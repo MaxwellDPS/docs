@@ -10,8 +10,6 @@ slug: overview
 
 A voice-powered AI assistant that answers phone calls, understands natural language, and can perform actions like setting timers, checking weather, scheduling callbacks, and more.
 
-![Assistant architecture diagram](screenshots/architecture.png)
-
 ---
 
 ## ✨ Features
@@ -27,57 +25,6 @@ A voice-powered AI assistant that answers phone calls, understands natural langu
 | ⏰ **Scheduled Calls** | One-time or recurring calls (daily briefings, reminders) |
 | 🗣️ **Custom Phrases** | Customize greetings, goodbyes, and responses via config |
 | 📊 **Observability** | Prometheus metrics, OpenTelemetry tracing, JSON logs |
-
----
-
-## 🏗️ Architecture
-
-```mermaid
-flowchart LR
-    subgraph Caller
-        Phone[📱 SIP Phone]
-    end
-    
-    subgraph Agent["🤖 SIP AI Agent"]
-        SIP[SIP Client]
-        Audio[Audio Pipeline]
-        Tools[Tool Manager]
-        API[REST API]
-    end
-    
-    subgraph Services
-        LLM[🧠 LLM Server<br/>OpenAI / vLLM / Ollama]
-        Speaches[🎤 Speaches<br/>STT + TTS]
-    end
-    
-    subgraph Integrations
-        HA[🏠 Home Assistant]
-        N8N[🔄 n8n]
-        Webhook[🔗 Webhooks]
-    end
-    
-    Phone <-->|SIP/RTP| SIP
-    SIP <--> Audio
-    Audio <-->|Whisper| Speaches
-    Audio <-->|Kokoro| Speaches
-    Audio <--> Tools
-    Tools <-->|OpenAI API| LLM
-    
-    API <--> Tools
-    HA -->|HTTP| API
-    N8N -->|HTTP| API
-    Webhook -->|HTTP| API
-```
-
-**Component Overview:**
-
-| Component | Description |
-|-----------|-------------|
-| 📱 **SIP Phone** | Any SIP-compatible phone or softphone |
-| 🤖 **SIP AI Agent** | Core application handling calls and conversations |
-| 🧠 **LLM Server** | Language model for understanding and responses |
-| 🎤 **Speaches** | Unified STT (Whisper) and TTS (Kokoro) server |
-| 🔗 **Integrations** | External systems that trigger calls via API |
 
 ---
 
