@@ -6,6 +6,8 @@ category:
 slug: tools
 ---
 
+> 🤖 **ROBO CODED** — This documentation was made with AI and may not be 100% sane. But the code does work! 🎉
+
 # 🔧 Built-in Tools
 
 The SIP AI Assistant includes several built-in tools that the LLM can invoke during conversations.

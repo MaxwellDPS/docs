@@ -6,6 +6,8 @@ category:
 slug: examples
 ---
 
+> 🤖 **ROBO CODED** — This documentation was made with AI and may not be 100% sane.
+
 # 📖 Examples
 
 Real-world examples and integration patterns for the SIP AI Assistant.

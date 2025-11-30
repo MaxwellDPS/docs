@@ -6,6 +6,8 @@ category:
 slug: overview
 ---
 
+> 🤖 **ROBO CODED** — This documentation was made with AI and may not be 100% sane. But the code does work! 🎉
+
 # 📞 SIP AI Assistant
 
 A voice-powered AI assistant that answers phone calls, understands natural language, and can perform actions like setting timers, checking weather, scheduling callbacks, and more.

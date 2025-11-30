@@ -6,6 +6,8 @@ category:
 slug: configuration
 ---
 
+> 🤖 **ROBO CODED** — This documentation was made with AI and may not be 100% sane. But the code does work! 🎉
+
 # ⚙️ Configuration Reference
 
 All configuration is done via environment variables. This page documents every available option.

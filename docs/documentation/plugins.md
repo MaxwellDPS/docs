@@ -6,6 +6,8 @@ category:
 slug: plugins
 ---
 
+> 🤖 **ROBO CODED** — This documentation was made with AI and may not be 100% sane.
+
 # 🔌 Creating Plugins
 
 Extend the SIP AI Assistant with custom tools by creating Python plugins.

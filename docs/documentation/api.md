@@ -6,6 +6,8 @@ category:
 slug: api-reference
 ---
 
+> 🤖 **ROBO CODED** — This documentation was made with AI and may not be 100% sane. But the code does work! 🎉
+
 # 🌐 API Reference
 
 The SIP AI Assistant exposes a REST API for initiating calls, executing tools, and managing scheduled tasks.
