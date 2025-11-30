@@ -1,0 +1,1168 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SIP AI Assistant API",
+    "description": "API for outbound notification calls with optional response collection",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "description": "Health check endpoint.",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/queue": {
+      "get": {
+        "summary": "Queue Status",
+        "description": "Get call queue status.",
+        "operationId": "queue_status_queue_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/call": {
+      "post": {
+        "summary": "Initiate Call",
+        "description": "Initiate an outbound notification call.\n\nThe call will be made asynchronously. If callback_url is provided,\nresults will be POSTed there when the call completes.\n\nCalls are queued and processed sequentially to prevent overwhelming the SIP system.\n\nNote: callback_url is required when using choice collection.\n\nSimple notification example:\n```json\n{\n    \"message\": \"Hello, this is a reminder about your appointment.\",\n    \"extension\": \"1001\"\n}\n```\n\nChoice collection example (requires callback_url):\n```json\n{\n    \"message\": \"Hello, this is a reminder about your appointment tomorrow at 2pm.\",\n    \"extension\": \"1001\",\n    \"callback_url\": \"https://example.com/webhook\",\n    \"choice\": {\n        \"prompt\": \"Say yes to confirm or no to cancel.\",\n        \"options\": [\n            {\"value\": \"confirmed\", \"synonyms\": [\"yes\", \"yeah\", \"yep\", \"confirm\"]},\n            {\"value\": \"cancelled\", \"synonyms\": [\"no\", \"nope\", \"cancel\"]}\n        ],\n        \"timeout_seconds\": 15\n    }\n}\n```",
+        "operationId": "initiate_call_call_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutboundCallRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutboundCallResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/call/{call_id}": {
+      "get": {
+        "summary": "Get Call Status",
+        "description": "Get status of a call.",
+        "operationId": "get_call_status_call__call_id__get",
+        "parameters": [
+          {
+            "name": "call_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Call Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools": {
+      "get": {
+        "summary": "List Tools",
+        "description": "List all available tools.\n\nReturns information about each tool including name, description, \nparameters, and whether it's enabled.",
+        "operationId": "list_tools_tools_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ToolInfo"
+                  },
+                  "type": "array",
+                  "title": "Response List Tools Tools Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/{tool_name}": {
+      "get": {
+        "summary": "Get Tool",
+        "description": "Get information about a specific tool.",
+        "operationId": "get_tool_tools__tool_name__get",
+        "parameters": [
+          {
+            "name": "tool_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tool Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/{tool_name}/call": {
+      "post": {
+        "summary": "Tool Call",
+        "description": "Execute a tool and call someone with the result.\n\nThis endpoint is perfect for webhooks - it executes a tool (like WEATHER),\nthen places an outbound call to speak the result to the recipient.\n\nExamples:\n\nWeather alert call:\n```json\nPOST /tools/WEATHER/call\n{\n    \"tool\": \"WEATHER\",\n    \"extension\": \"1001\",\n    \"prefix\": \"Good morning! Here's your weather update.\",\n    \"suffix\": \"Have a great day!\"\n}\n```\n\nScheduled weather call (from cron/Home Assistant):\n```bash\ncurl -X POST http://sip-agent:8080/tools/WEATHER/call \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"tool\": \"WEATHER\", \"extension\": \"5551234567\"}'\n```\n\nDateTime announcement:\n```json\nPOST /tools/DATETIME/call\n{\n    \"tool\": \"DATETIME\",\n    \"params\": {\"format\": \"full\"},\n    \"extension\": \"1001\",\n    \"prefix\": \"Attention please.\"\n}\n```\n\nWith callback for confirmation:\n```json\n{\n    \"tool\": \"WEATHER\",\n    \"extension\": \"1001\",\n    \"callback_url\": \"https://example.com/webhook/weather-call-complete\"\n}\n```",
+        "operationId": "tool_call_tools__tool_name__call_post",
+        "parameters": [
+          {
+            "name": "tool_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tool Name"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToolCallRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolCallResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/{tool_name}/execute": {
+      "post": {
+        "summary": "Execute Tool",
+        "description": "Execute a tool and optionally speak the result.\n\nThis endpoint allows external systems (webhooks, home automation, etc.)\nto trigger tool execution. The result can optionally be spoken to \nan active call.\n\nExamples:\n\nGet weather (just data):\n```json\nPOST /tools/WEATHER/execute\n{\"tool\": \"WEATHER\"}\n```\n\nGet weather and speak to call:\n```json\nPOST /tools/WEATHER/execute\n{\"tool\": \"WEATHER\", \"speak_result\": true}\n```\n\nExecute calculation:\n```json\nPOST /tools/CALC/execute\n{\"tool\": \"CALC\", \"params\": {\"expression\": \"25 * 4\"}}\n```\n\nSet a timer and announce it:\n```json\nPOST /tools/SET_TIMER/execute\n{\n    \"tool\": \"SET_TIMER\",\n    \"params\": {\"duration\": 300, \"message\": \"Pizza is ready!\"},\n    \"speak_result\": true\n}\n```",
+        "operationId": "execute_tool_tools__tool_name__execute_post",
+        "parameters": [
+          {
+            "name": "tool_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tool Name"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToolExecuteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolExecuteResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/speak": {
+      "post": {
+        "summary": "Speak Message",
+        "description": "Speak a message to the active call.\n\nThis is useful for external systems to inject announcements\ninto an ongoing call.\n\nQuery params:\n- message: The text to speak\n- call_id: Optional specific call ID (if multiple calls active)",
+        "operationId": "speak_message_speak_post",
+        "parameters": [
+          {
+            "name": "message",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Message"
+            }
+          },
+          {
+            "name": "call_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Call Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/schedule": {
+      "get": {
+        "summary": "List Scheduled Calls",
+        "description": "List all scheduled calls.",
+        "operationId": "list_scheduled_calls_schedule_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ScheduledCallInfo"
+                  },
+                  "type": "array",
+                  "title": "Response List Scheduled Calls Schedule Get"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Schedule Call",
+        "description": "Schedule a call for a future time.\n\nYou can schedule a call with either a static message or a tool that\nwill be executed at call time (e.g., WEATHER for fresh data).\n\nTime can be specified as:\n- delay_seconds: Number of seconds from now\n- at_time: ISO datetime (2025-01-15T07:00:00) or HH:MM time (07:00)\n\nExamples:\n\nWake-up weather call in 8 hours:\n```json\n{\n    \"extension\": \"1001\",\n    \"tool\": \"WEATHER\",\n    \"delay_seconds\": 28800,\n    \"prefix\": \"Good morning! Here's your weather.\"\n}\n```\n\nDaily 7am weather call:\n```json\n{\n    \"extension\": \"1001\",\n    \"tool\": \"WEATHER\",\n    \"at_time\": \"07:00\",\n    \"timezone\": \"America/Los_Angeles\",\n    \"prefix\": \"Good morning!\",\n    \"recurring\": \"daily\"\n}\n```\n\nReminder call at specific time:\n```json\n{\n    \"extension\": \"5551234567\",\n    \"message\": \"This is your reminder to take your medication.\",\n    \"at_time\": \"2025-01-15T09:00:00\",\n    \"timezone\": \"America/New_York\"\n}\n```\n\nWeekday morning briefing:\n```json\n{\n    \"extension\": \"1001\",\n    \"tool\": \"WEATHER\",\n    \"at_time\": \"06:30\",\n    \"recurring\": \"weekdays\",\n    \"prefix\": \"Good morning! Time to wake up.\"\n}\n```",
+        "operationId": "schedule_call_schedule_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduledCallRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduledCallResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/schedule/{schedule_id}": {
+      "get": {
+        "summary": "Get Scheduled Call",
+        "description": "Get details of a scheduled call.",
+        "operationId": "get_scheduled_call_schedule__schedule_id__get",
+        "parameters": [
+          {
+            "name": "schedule_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Schedule Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduledCallInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Cancel Scheduled Call",
+        "description": "Cancel a scheduled call.",
+        "operationId": "cancel_scheduled_call_schedule__schedule_id__delete",
+        "parameters": [
+          {
+            "name": "schedule_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Schedule Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CallStatus": {
+        "type": "string",
+        "enum": [
+          "queued",
+          "ringing",
+          "answered",
+          "completed",
+          "no_answer",
+          "failed",
+          "busy"
+        ],
+        "title": "CallStatus",
+        "description": "Status of an outbound call."
+      },
+      "ChoiceOption": {
+        "properties": {
+          "value": {
+            "type": "string",
+            "title": "Value",
+            "description": "The value to return if selected"
+          },
+          "synonyms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Synonyms",
+            "description": "Alternative phrases that map to this choice"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value"
+        ],
+        "title": "ChoiceOption",
+        "description": "A choice option for the user."
+      },
+      "ChoicePrompt": {
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "Question to ask the user"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/ChoiceOption"
+            },
+            "type": "array",
+            "title": "Options",
+            "description": "Valid choice options"
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "title": "Timeout Seconds",
+            "description": "How long to wait for response",
+            "default": 30
+          },
+          "repeat_count": {
+            "type": "integer",
+            "title": "Repeat Count",
+            "description": "How many times to repeat prompt if no response",
+            "default": 2
+          }
+        },
+        "type": "object",
+        "required": [
+          "prompt",
+          "options"
+        ],
+        "title": "ChoicePrompt",
+        "description": "Configuration for collecting user choice."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "OutboundCallRequest": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Message to speak to the recipient"
+          },
+          "extension": {
+            "type": "string",
+            "title": "Extension",
+            "description": "SIP extension or phone number to call"
+          },
+          "callback_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Callback Url",
+            "description": "Webhook URL to POST results to (required if choice is specified)"
+          },
+          "ring_timeout": {
+            "type": "integer",
+            "title": "Ring Timeout",
+            "description": "Seconds to wait for call to be answered",
+            "default": 30
+          },
+          "choice": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChoicePrompt"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional choice prompt for collecting response"
+          },
+          "call_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Call Id",
+            "description": "Optional caller-provided ID for tracking"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "extension"
+        ],
+        "title": "OutboundCallRequest",
+        "description": "Request to initiate an outbound notification call."
+      },
+      "OutboundCallResponse": {
+        "properties": {
+          "call_id": {
+            "type": "string",
+            "title": "Call Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CallStatus"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "queue_position": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Queue Position"
+          }
+        },
+        "type": "object",
+        "required": [
+          "call_id",
+          "status",
+          "message"
+        ],
+        "title": "OutboundCallResponse",
+        "description": "Response to outbound call request."
+      },
+      "ScheduledCallInfo": {
+        "properties": {
+          "schedule_id": {
+            "type": "string",
+            "title": "Schedule Id"
+          },
+          "extension": {
+            "type": "string",
+            "title": "Extension"
+          },
+          "scheduled_for": {
+            "type": "string",
+            "title": "Scheduled For"
+          },
+          "remaining_seconds": {
+            "type": "integer",
+            "title": "Remaining Seconds"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "tool": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tool"
+          },
+          "recurring": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recurring"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "schedule_id",
+          "extension",
+          "scheduled_for",
+          "remaining_seconds",
+          "status"
+        ],
+        "title": "ScheduledCallInfo",
+        "description": "Information about a scheduled call."
+      },
+      "ScheduledCallRequest": {
+        "properties": {
+          "extension": {
+            "type": "string",
+            "title": "Extension",
+            "description": "SIP extension or phone number to call"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message",
+            "description": "Message to speak (if no tool specified)"
+          },
+          "tool": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tool",
+            "description": "Tool to execute and speak result (e.g., WEATHER)"
+          },
+          "tool_params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Tool Params",
+            "description": "Parameters for the tool"
+          },
+          "delay_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delay Seconds",
+            "description": "Seconds from now to make the call"
+          },
+          "at_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "At Time",
+            "description": "ISO datetime or HH:MM time to make the call"
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone",
+            "description": "Timezone for at_time (default: America/Los_Angeles)",
+            "default": "America/Los_Angeles"
+          },
+          "prefix": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prefix",
+            "description": "Message to speak before tool result"
+          },
+          "suffix": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suffix",
+            "description": "Message to speak after tool result"
+          },
+          "callback_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Callback Url",
+            "description": "Webhook URL to POST results to"
+          },
+          "recurring": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recurring",
+            "description": "Recurrence pattern: 'daily', 'weekdays', 'weekends', or cron expression"
+          }
+        },
+        "type": "object",
+        "required": [
+          "extension"
+        ],
+        "title": "ScheduledCallRequest",
+        "description": "Request to schedule a call for a future time."
+      },
+      "ScheduledCallResponse": {
+        "properties": {
+          "schedule_id": {
+            "type": "string",
+            "title": "Schedule Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "extension": {
+            "type": "string",
+            "title": "Extension"
+          },
+          "scheduled_for": {
+            "type": "string",
+            "title": "Scheduled For"
+          },
+          "delay_seconds": {
+            "type": "integer",
+            "title": "Delay Seconds"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "recurring": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recurring"
+          }
+        },
+        "type": "object",
+        "required": [
+          "schedule_id",
+          "status",
+          "extension",
+          "scheduled_for",
+          "delay_seconds",
+          "message"
+        ],
+        "title": "ScheduledCallResponse",
+        "description": "Response from scheduled call request."
+      },
+      "ToolCallRequest": {
+        "properties": {
+          "tool": {
+            "type": "string",
+            "title": "Tool",
+            "description": "Name of the tool to execute (e.g., WEATHER, DATETIME)"
+          },
+          "params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Params",
+            "description": "Parameters to pass to the tool"
+          },
+          "extension": {
+            "type": "string",
+            "title": "Extension",
+            "description": "SIP extension or phone number to call"
+          },
+          "prefix": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prefix",
+            "description": "Message to speak before the tool result"
+          },
+          "suffix": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suffix",
+            "description": "Message to speak after the tool result"
+          },
+          "ring_timeout": {
+            "type": "integer",
+            "title": "Ring Timeout",
+            "description": "Seconds to wait for call to be answered",
+            "default": 30
+          },
+          "callback_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Callback Url",
+            "description": "Webhook URL to POST call results to"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tool",
+          "extension"
+        ],
+        "title": "ToolCallRequest",
+        "description": "Request to execute a tool and call someone with the result."
+      },
+      "ToolCallResponse": {
+        "properties": {
+          "call_id": {
+            "type": "string",
+            "title": "Call Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "tool": {
+            "type": "string",
+            "title": "Tool"
+          },
+          "tool_success": {
+            "type": "boolean",
+            "title": "Tool Success"
+          },
+          "tool_message": {
+            "type": "string",
+            "title": "Tool Message"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "call_id",
+          "status",
+          "tool",
+          "tool_success",
+          "tool_message",
+          "message"
+        ],
+        "title": "ToolCallResponse",
+        "description": "Response from tool call request."
+      },
+      "ToolExecuteRequest": {
+        "properties": {
+          "tool": {
+            "type": "string",
+            "title": "Tool",
+            "description": "Name of the tool to execute (e.g., WEATHER, DATETIME)"
+          },
+          "params": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Params",
+            "description": "Parameters to pass to the tool"
+          },
+          "speak_result": {
+            "type": "boolean",
+            "title": "Speak Result",
+            "description": "Speak the result to the active call",
+            "default": false
+          },
+          "call_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Call Id",
+            "description": "Specific call to speak to (if multiple calls active)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tool"
+        ],
+        "title": "ToolExecuteRequest",
+        "description": "Request to execute a tool."
+      },
+      "ToolExecuteResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "tool": {
+            "type": "string",
+            "title": "Tool"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data"
+          },
+          "spoken": {
+            "type": "boolean",
+            "title": "Spoken",
+            "default": false
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "tool",
+          "message"
+        ],
+        "title": "ToolExecuteResponse",
+        "description": "Response from tool execution."
+      },
+      "ToolInfo": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "parameters": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Parameters"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "description",
+          "parameters",
+          "enabled"
+        ],
+        "title": "ToolInfo",
+        "description": "Information about an available tool."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

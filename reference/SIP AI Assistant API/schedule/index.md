@@ -1,0 +1,4 @@
+---
+title: /schedule
+hidden: false
+---
