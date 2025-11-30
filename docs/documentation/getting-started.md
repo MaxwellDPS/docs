@@ -143,6 +143,7 @@ curl http://localhost:8080/tools | jq '.[].name'
 "DATETIME"
 "CALC"
 "JOKE"
+"SIMON_SAYS"
 ```
 
 ![Tools list](screenshots/tools-list.png)

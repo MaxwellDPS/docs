@@ -360,6 +360,58 @@ Tell a random joke.
 
 ---
 
+## 🦜 SIMON_SAYS
+
+Repeat back exactly what the user says.
+
+| Property | Value |
+|----------|-------|
+| **Name** | `SIMON_SAYS` |
+| **Parameters** | `text` (required) |
+
+### 📋 Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|:--------:|-------------|
+| `text` | string | ✅ | Exact text to repeat verbatim |
+
+### 🗣️ Trigger Phrases
+
+- *"Simon says hello world"*
+- *"Repeat after me: the quick brown fox"*
+- *"Say this: testing one two three"*
+- *"Echo: can you hear me?"*
+- *"Repeat: I love pizza"*
+
+### 📤 Example Conversation
+
+```
+👤 "Simon says the rain in Spain falls mainly on the plain"
+🤖 "the rain in Spain falls mainly on the plain"
+
+👤 "Repeat after me: hello my name is Bob"
+🤖 "hello my name is Bob"
+
+👤 "Can you say supercalifragilisticexpialidocious?"
+🤖 "supercalifragilisticexpialidocious"
+```
+
+### ⚙️ Tool Invocation
+
+```
+[TOOL:SIMON_SAYS:text=hello world]
+[TOOL:SIMON_SAYS:text=the quick brown fox jumps over the lazy dog]
+```
+
+### 💡 Use Cases
+
+- 🧪 Testing TTS pronunciation
+- 🎤 Voice testing and calibration
+- 🎮 Fun games with kids
+- 📢 Broadcasting specific messages
+
+---
+
 ## ⚙️ Tool Invocation Reference
 
 The LLM invokes tools using this format:
