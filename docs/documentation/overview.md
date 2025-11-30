@@ -1,6 +1,6 @@
 ---
-title: "SIP AI Assistant"
-excerpt: "Voice-powered AI assistant for SIP phone systems"
+title: "📞⚡ General Dissarray"
+excerpt: "🤖 Voice-powered AI assistant for SIP phone systems"
 slug: overview
 ---
 
