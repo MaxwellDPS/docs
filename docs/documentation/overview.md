@@ -1,7 +1,6 @@
 ---
 title: '📞⚡ General Disarray '
 excerpt: '🤖 Voice-powered AI assistant for SIP phone systems by CHAOS.CORP '
-icon: 📞
 slug: overview
 ---
 <Callout icon="🤖" theme="default">
