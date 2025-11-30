@@ -75,12 +75,12 @@ Initiate an outbound notification call.
 
 | Field | Type | Required | Description |
 |-------|------|:--------:|-------------|
-| `message` | string | ✅ | Message to speak |
-| `extension` | string | ✅ | Phone number or SIP extension |
-| `callback_url` | string | ❌ | Webhook for results |
-| `ring_timeout` | integer | ❌ | Seconds to wait (default: 30) |
-| `call_id` | string | ❌ | Custom call ID |
-| `choice` | object | ❌ | Choice collection config |
+| `message` | string | Yes | Message to speak |
+| `extension` | string | Yes | Phone number or SIP extension |
+| `callback_url` | string | No | Webhook for results |
+| `ring_timeout` | integer | No | Seconds to wait (default: 30) |
+| `call_id` | string | No | Custom call ID |
+| `choice` | object | No | Choice collection config |
 
 #### 📤 Simple Notification
 
@@ -223,9 +223,9 @@ Execute a tool and get the result.
 
 | Field | Type | Required | Description |
 |-------|------|:--------:|-------------|
-| `params` | object | ❌ | Tool parameters |
-| `speak_result` | boolean | ❌ | Speak to active call |
-| `call_id` | string | ❌ | Specific call ID |
+| `params` | object | No | Tool parameters |
+| `speak_result` | boolean | No | Speak to active call |
+| `call_id` | string | No | Specific call ID |
 
 #### 🌤️ Execute Weather Tool
 
@@ -309,12 +309,12 @@ Execute a tool and call someone with the result.
 
 | Field | Type | Required | Description |
 |-------|------|:--------:|-------------|
-| `extension` | string | ✅ | Phone number to call |
-| `params` | object | ❌ | Tool parameters |
-| `prefix` | string | ❌ | Message before tool result |
-| `suffix` | string | ❌ | Message after tool result |
-| `ring_timeout` | integer | ❌ | Ring timeout in seconds |
-| `callback_url` | string | ❌ | Webhook for results |
+| `extension` | string | Yes | Phone number to call |
+| `params` | object | No | Tool parameters |
+| `prefix` | string | No | Message before tool result |
+| `suffix` | string | No | Message after tool result |
+| `ring_timeout` | integer | No | Ring timeout in seconds |
+| `callback_url` | string | No | Webhook for results |
 
 #### 🌤️ Weather Call
 
@@ -370,17 +370,17 @@ Schedule a call for a future time.
 
 | Field | Type | Required | Description |
 |-------|------|:--------:|-------------|
-| `extension` | string | ✅ | Phone number to call |
+| `extension` | string | Yes | Phone number to call |
 | `message` | string | ⚠️ | Static message (or use `tool`) |
 | `tool` | string | ⚠️ | Tool to execute at call time |
-| `tool_params` | object | ❌ | Parameters for the tool |
+| `tool_params` | object | No | Parameters for the tool |
 | `delay_seconds` | integer | ⚠️ | Seconds from now |
 | `at_time` | string | ⚠️ | ISO datetime or HH:MM |
-| `timezone` | string | ❌ | Timezone (default: America/Los_Angeles) |
-| `prefix` | string | ❌ | Message before tool result |
-| `suffix` | string | ❌ | Message after tool result |
-| `recurring` | string | ❌ | `daily`, `weekdays`, `weekends` |
-| `callback_url` | string | ❌ | Webhook for results |
+| `timezone` | string | No | Timezone (default: America/Los_Angeles) |
+| `prefix` | string | No | Message before tool result |
+| `suffix` | string | No | Message after tool result |
+| `recurring` | string | No | `daily`, `weekdays`, `weekends` |
+| `callback_url` | string | No | Webhook for results |
 
 > ⚠️ Either `message` or `tool` required. Either `delay_seconds` or `at_time` required.
 
@@ -531,8 +531,8 @@ Inject a message into an active call.
 
 | Parameter | Type | Required | Description |
 |-----------|------|:--------:|-------------|
-| `message` | string | ✅ | Text to speak |
-| `call_id` | string | ❌ | Specific call ID |
+| `message` | string | Yes | Text to speak |
+| `call_id` | string | No | Specific call ID |
 
 ```bash
 curl -X POST "http://localhost:8080/speak?message=Attention:%20severe%20weather%20warning" | jq

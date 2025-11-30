@@ -71,7 +71,18 @@ LLM_BASE_URL=http://vllm:8000/v1
 LLM_MODEL=openai-community/gpt2-xl
 ```
 
-> 💡 **Tip:** See [Configuration Reference](configuration) for all available options.
+**GPU-Specific Model Recommendations:**
+
+| Your GPU | LLM Model | STT Model |
+|----------|-----------|-----------|
+| H100 / A100 (80GB) | `meta-llama/Llama-3.1-70B-Instruct` | `faster-whisper-large-v3` |
+| DGX Spark (128GB) | `meta-llama/Llama-3.1-70B-Instruct` | `faster-whisper-large-v3` |
+| RTX 5090 (32GB) | `Qwen/Qwen2.5-32B-Instruct` | `faster-whisper-large-v3` |
+| RTX 4090 (24GB) | `Qwen/Qwen2.5-14B-Instruct` | `faster-whisper-large-v3` |
+| RTX 3090/4080 (16-24GB) | `meta-llama/Llama-3.1-8B-Instruct` | `faster-whisper-medium` |
+| RTX 3080/4070 (10-12GB) | `Qwen/Qwen2.5-7B-Instruct` | `faster-whisper-small` |
+
+> 💡 **Tip:** See [Configuration Reference](configuration) for all available options and full model recommendations.
 
 ---
 

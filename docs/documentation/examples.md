@@ -6,7 +6,7 @@ category:
 slug: examples
 ---
 
-> 🤖 **ROBO CODED** — This documentation was made with AI and may not be 100% sane.
+> 🤖 **ROBO CODED** — This documentation was made with AI and may not be 100% sane. But the code does work! 🎉
 
 # 📖 Examples
 

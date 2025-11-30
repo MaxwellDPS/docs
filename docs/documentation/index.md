@@ -134,6 +134,22 @@ sequenceDiagram
 
 ---
 
+## 🧠 Recommended Models
+
+Quick reference for GPU-specific configurations. See [Configuration](configuration) for full details.
+
+| GPU | VRAM | Recommended LLM | STT Model |
+|-----|------|-----------------|-----------|
+| H100 / A100 | 80GB | `meta-llama/Llama-3.1-70B-Instruct` | `faster-whisper-large-v3` |
+| DGX Spark | 128GB | `meta-llama/Llama-3.1-70B-Instruct` | `faster-whisper-large-v3` |
+| RTX 5090 | 32GB | `Qwen/Qwen2.5-32B-Instruct` | `faster-whisper-large-v3` |
+| RTX 4090 | 24GB | `Qwen/Qwen2.5-14B-Instruct` | `faster-whisper-large-v3` |
+| RTX 3090 | 24GB | `meta-llama/Llama-3.1-8B-Instruct` | `faster-whisper-medium` |
+| RTX 4080 | 16GB | `meta-llama/Llama-3.1-8B-Instruct` | `faster-whisper-medium` |
+| RTX 3080 | 10GB | `Qwen/Qwen2.5-7B-Instruct` | `faster-whisper-small` |
+
+---
+
 ## 🎬 Demo
 
 ![Demo video thumbnail](screenshots/demo-video.png)

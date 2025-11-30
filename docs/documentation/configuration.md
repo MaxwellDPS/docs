@@ -18,12 +18,12 @@ All configuration is done via environment variables. This page documents every a
 
 | Variable | Required | Default | Description |
 |----------|:--------:|---------|-------------|
-| `SIP_USER` | ✅ | `ai-assistant` | SIP account username |
-| `SIP_PASSWORD` | ✅ | - | SIP account password |
-| `SIP_DOMAIN` | ✅ | `localhost` | SIP server domain/IP |
-| `SIP_PORT` | ❌ | `5060` | SIP server port |
-| `SIP_TRANSPORT` | ❌ | `udp` | Transport: `udp`, `tcp`, `tls` |
-| `SIP_REGISTRAR` | ❌ | - | Optional separate registrar |
+| `SIP_USER` | Yes | `ai-assistant` | SIP account username |
+| `SIP_PASSWORD` | Yes | - | SIP account password |
+| `SIP_DOMAIN` | Yes | `localhost` | SIP server domain/IP |
+| `SIP_PORT` | No | `5060` | SIP server port |
+| `SIP_TRANSPORT` | No | `udp` | Transport: `udp`, `tcp`, `tls` |
+| `SIP_REGISTRAR` | No | - | Optional separate registrar |
 
 **Example:**
 
@@ -44,16 +44,16 @@ This project uses [Speaches](https://github.com/speaches-ai/speaches) as a unifi
 
 | Variable | Required | Default | Description |
 |----------|:--------:|---------|-------------|
-| `SPEACHES_API_URL` | ✅ | `http://localhost:8001` | Speaches server URL |
-| `STT_MODE` | ❌ | `batch` | `batch` or `realtime` |
-| `WHISPER_MODEL` | ❌ | `Systran/faster-distil-whisper-small.en` | Whisper model |
-| `WHISPER_LANGUAGE` | ❌ | `en` | Language code |
+| `SPEACHES_API_URL` | Yes | `http://localhost:8001` | Speaches server URL |
+| `STT_MODE` | No | `batch` | `batch` or `realtime` |
+| `WHISPER_MODEL` | No | `Systran/faster-distil-whisper-small.en` | Whisper model |
+| `WHISPER_LANGUAGE` | No | `en` | Language code |
 
 ### 🎯 STT Modes
 
 | Mode | Description | Recommended |
 |------|-------------|:-----------:|
-| `batch` | Buffer audio locally, send on silence | ✅ |
+| `batch` | Buffer audio locally, send on silence | Yes |
 | `realtime` | Stream continuously to server | ⚠️ Experimental |
 
 **Example:**
@@ -72,10 +72,10 @@ WHISPER_LANGUAGE=en
 
 | Variable | Required | Default | Description |
 |----------|:--------:|---------|-------------|
-| `TTS_MODEL` | ❌ | `speaches-ai/Kokoro-82M-v1.0-ONNX` | TTS model |
-| `TTS_VOICE` | ❌ | `af_heart` | Voice ID |
-| `TTS_SPEED` | ❌ | `1.0` | Speech speed (0.5-2.0) |
-| `TTS_RESPONSE_FORMAT` | ❌ | `wav` | Format: `wav`, `mp3`, `opus` |
+| `TTS_MODEL` | No | `speaches-ai/Kokoro-82M-v1.0-ONNX` | TTS model |
+| `TTS_VOICE` | No | `af_heart` | Voice ID |
+| `TTS_SPEED` | No | `1.0` | Speech speed (0.5-2.0) |
+| `TTS_RESPONSE_FORMAT` | No | `wav` | Format: `wav`, `mp3`, `opus` |
 
 **Example:**
 
@@ -104,18 +104,18 @@ bm_george   - British Male
 
 | Variable | Required | Default | Description |
 |----------|:--------:|---------|-------------|
-| `LLM_BASE_URL` | ✅ | `http://vllm:8000/v1` | OpenAI-compatible API URL |
-| `LLM_MODEL` | ✅ | `openai-community/gpt2-xl` | Model name |
-| `LLM_API_KEY` | ❌ | `not-needed` | API key (if required) |
-| `LLM_BACKEND` | ❌ | `vllm` | Backend type |
-| `LLM_MAX_TOKENS` | ❌ | `512` | Max response tokens |
-| `LLM_TEMPERATURE` | ❌ | `0.6` | Creativity (0.0-1.0) |
-| `LLM_TOP_P` | ❌ | `0.85` | Nucleus sampling |
+| `LLM_BASE_URL` | Yes | `http://vllm:8000/v1` | OpenAI-compatible API URL |
+| `LLM_MODEL` | Yes | `openai-community/gpt2-xl` | Model name |
+| `LLM_API_KEY` | No | `not-needed` | API key (if required) |
+| `LLM_BACKEND` | No | `vllm` | Backend type |
+| `LLM_MAX_TOKENS` | No | `512` | Max response tokens |
+| `LLM_TEMPERATURE` | No | `0.6` | Creativity (0.0-1.0) |
+| `LLM_TOP_P` | No | `0.85` | Nucleus sampling |
 
 **Example configurations:**
 
 ```env
-# 🧠 Using vLLM with openGPT
+# Using vLLM with openGPT
 LLM_BASE_URL=http://vllm:8000/v1
 LLM_MODEL=openai-community/gpt2-xl
 LLM_MAX_TOKENS=512
@@ -123,17 +123,146 @@ LLM_TEMPERATURE=0.6
 ```
 
 ```env
-# 🧠 Using OpenAI API
+# Using OpenAI API
 LLM_BASE_URL=https://api.openai.com/v1
 LLM_MODEL=gpt-4
 LLM_API_KEY=sk-your-api-key
 ```
 
 ```env
-# 🧠 Using Ollama
+# Using Ollama
 LLM_BASE_URL=http://ollama:11434/v1
 LLM_MODEL=llama3.1
 ```
+
+---
+
+## 🎮 Recommended Models by GPU
+
+### NVIDIA H100 / A100 (80GB HBM)
+
+Data center GPUs with maximum performance.
+
+| Component | Model | Notes |
+|-----------|-------|-------|
+| LLM | `meta-llama/Llama-3.1-70B-Instruct` | Best quality |
+| LLM | `Qwen/Qwen2.5-72B-Instruct` | Alternative |
+| STT | `Systran/faster-whisper-large-v3` | Best accuracy |
+| TTS | `af_heart` | Warm voice |
+
+```env
+LLM_MODEL=meta-llama/Llama-3.1-70B-Instruct
+STT_MODEL=Systran/faster-whisper-large-v3
+TTS_VOICE=af_heart
+```
+
+### NVIDIA DGX Spark (128GB Unified)
+
+Grace Blackwell GB10 with shared CPU/GPU memory.
+
+| Component | Model | Notes |
+|-----------|-------|-------|
+| LLM | `meta-llama/Llama-3.1-70B-Instruct` | Fits unified memory |
+| LLM | `deepseek-ai/DeepSeek-R1-Distill-Llama-70B` | Reasoning focused |
+| STT | `Systran/faster-whisper-large-v3` | Best accuracy |
+| TTS | `af_heart` | Warm voice |
+
+```env
+LLM_MODEL=meta-llama/Llama-3.1-70B-Instruct
+STT_MODEL=Systran/faster-whisper-large-v3
+TTS_VOICE=af_heart
+```
+
+### NVIDIA RTX 5090 (32GB GDDR7)
+
+Next-gen consumer flagship.
+
+| Component | Model | Notes |
+|-----------|-------|-------|
+| LLM | `Qwen/Qwen2.5-32B-Instruct` | Best for 32GB |
+| LLM | `mistralai/Mistral-Small-24B-Instruct-2501` | Good balance |
+| STT | `Systran/faster-whisper-large-v3` | Best accuracy |
+| TTS | `af_heart` | Warm voice |
+
+```env
+LLM_MODEL=Qwen/Qwen2.5-32B-Instruct
+STT_MODEL=Systran/faster-whisper-large-v3
+TTS_VOICE=af_heart
+```
+
+### NVIDIA RTX 4090 (24GB GDDR6X)
+
+Current consumer flagship.
+
+| Component | Model | Notes |
+|-----------|-------|-------|
+| LLM | `Qwen/Qwen2.5-14B-Instruct` | Best for 24GB |
+| LLM | `meta-llama/Llama-3.1-8B-Instruct` | Faster |
+| STT | `Systran/faster-whisper-large-v3` | Best accuracy |
+| TTS | `af_heart` | Warm voice |
+
+```env
+LLM_MODEL=Qwen/Qwen2.5-14B-Instruct
+STT_MODEL=Systran/faster-whisper-large-v3
+TTS_VOICE=af_heart
+```
+
+### NVIDIA RTX 3090 / 4080 (16-24GB)
+
+High-end consumer GPUs.
+
+| Component | Model | Notes |
+|-----------|-------|-------|
+| LLM | `meta-llama/Llama-3.1-8B-Instruct` | Best for 16-24GB |
+| LLM | `Qwen/Qwen2.5-7B-Instruct` | Faster |
+| STT | `Systran/faster-whisper-medium` | Good balance |
+| TTS | `af_heart` | Warm voice |
+
+```env
+LLM_MODEL=meta-llama/Llama-3.1-8B-Instruct
+STT_MODEL=Systran/faster-whisper-medium
+TTS_VOICE=af_heart
+```
+
+### NVIDIA RTX 3080 / 4070 (10-12GB)
+
+Mid-range GPUs.
+
+| Component | Model | Notes |
+|-----------|-------|-------|
+| LLM | `Qwen/Qwen2.5-7B-Instruct` | Best for 10-12GB |
+| LLM | `microsoft/Phi-3-mini-4k-instruct` | Very fast |
+| STT | `Systran/faster-whisper-small` | Low VRAM |
+| TTS | `af_heart` | Warm voice |
+
+```env
+LLM_MODEL=Qwen/Qwen2.5-7B-Instruct
+STT_MODEL=Systran/faster-whisper-small
+TTS_VOICE=af_heart
+```
+
+### Low-Latency Stack (Any GPU)
+
+Optimized for fastest response times.
+
+```env
+LLM_MODEL=Qwen/Qwen2.5-3B-Instruct
+STT_MODEL=Systran/faster-whisper-tiny.en
+TTS_VOICE=af_heart
+TTS_SPEED=1.1
+```
+
+### TTS Voice Options
+
+| Voice | Style | Gender | Accent |
+|-------|-------|--------|--------|
+| `af_heart` | Warm, friendly | Female | American |
+| `af_bella` | Professional | Female | American |
+| `af_sarah` | Casual | Female | American |
+| `am_adam` | Neutral | Male | American |
+| `am_michael` | Professional | Male | American |
+| `bf_emma` | Warm | Female | British |
+| `bm_george` | Professional | Male | British |
 
 ---
 
@@ -141,11 +270,11 @@ LLM_MODEL=llama3.1
 
 | Variable | Required | Default | Description |
 |----------|:--------:|---------|-------------|
-| `MIN_SPEECH_DURATION_MS` | ❌ | `200` | Min speech to process (ms) |
-| `MAX_SPEECH_DURATION_S` | ❌ | `10.0` | Max utterance length (s) |
-| `SILENCE_TIMEOUT_MS` | ❌ | `750` | Silence before end-of-speech |
-| `BARGE_IN_MIN_DURATION` | ❌ | `400` | Min duration to interrupt (ms) |
-| `BARGE_IN_ENERGY_THRESHOLD` | ❌ | `2000` | Energy threshold |
+| `MIN_SPEECH_DURATION_MS` | No | `200` | Min speech to process (ms) |
+| `MAX_SPEECH_DURATION_S` | No | `10.0` | Max utterance length (s) |
+| `SILENCE_TIMEOUT_MS` | No | `750` | Silence before end-of-speech |
+| `BARGE_IN_MIN_DURATION` | No | `400` | Min duration to interrupt (ms) |
+| `BARGE_IN_ENERGY_THRESHOLD` | No | `2000` | Energy threshold |
 
 **Example:**
 
@@ -164,8 +293,8 @@ BARGE_IN_ENERGY_THRESHOLD=2000
 
 | Variable | Required | Default | Description |
 |----------|:--------:|---------|-------------|
-| `MAX_CONVERSATION_TURNS` | ❌ | `10` | Max turns before ending |
-| `CALLBACK_RING_TIMEOUT` | ❌ | `30` | Callback ring timeout (s) |
+| `MAX_CONVERSATION_TURNS` | No | `10` | Max turns before ending |
+| `CALLBACK_RING_TIMEOUT` | No | `30` | Callback ring timeout (s) |
 
 ---
 
@@ -173,8 +302,8 @@ BARGE_IN_ENERGY_THRESHOLD=2000
 
 | Variable | Required | Default | Description |
 |----------|:--------:|---------|-------------|
-| `TEMPEST_STATION_ID` | ❌ | - | WeatherFlow station ID |
-| `TEMPEST_API_TOKEN` | ❌ | - | WeatherFlow API token |
+| `TEMPEST_STATION_ID` | No | - | WeatherFlow station ID |
+| `TEMPEST_API_TOKEN` | No | - | WeatherFlow API token |
 
 **Get your credentials:**
 
@@ -200,10 +329,10 @@ TEMPEST_API_TOKEN=a1b2c3d4-e5f6-7890-abcd-ef1234567890
 
 | Variable | Required | Default | Description |
 |----------|:--------:|---------|-------------|
-| `API_RETRY_ATTEMPTS` | ❌ | `3` | Retry attempts |
-| `API_RETRY_BASE_DELAY_S` | ❌ | `0.5` | Base retry delay |
-| `API_RETRY_MAX_DELAY_S` | ❌ | `5.0` | Max retry delay |
-| `API_TIMEOUT_S` | ❌ | `30.0` | Request timeout |
+| `API_RETRY_ATTEMPTS` | No | `3` | Retry attempts |
+| `API_RETRY_BASE_DELAY_S` | No | `0.5` | Base retry delay |
+| `API_RETRY_MAX_DELAY_S` | No | `5.0` | Max retry delay |
+| `API_TIMEOUT_S` | No | `30.0` | Request timeout |
 
 ---
 
@@ -211,10 +340,10 @@ TEMPEST_API_TOKEN=a1b2c3d4-e5f6-7890-abcd-ef1234567890
 
 | Variable | Required | Default | Description |
 |----------|:--------:|---------|-------------|
-| `LOG_LEVEL` | ❌ | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
-| `OTEL_ENABLED` | ❌ | `true` | Enable OpenTelemetry |
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | ❌ | `http://otel-collector:4317` | OTLP endpoint |
-| `OTEL_SERVICE_NAME` | ❌ | `sip-agent` | Service name |
+| `LOG_LEVEL` | No | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+| `OTEL_ENABLED` | No | `true` | Enable OpenTelemetry |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | No | `http://otel-collector:4317` | OTLP endpoint |
+| `OTEL_SERVICE_NAME` | No | `sip-agent` | Service name |
 
 **Example:**
 
@@ -232,8 +361,8 @@ OTEL_SERVICE_NAME=sip-agent
 
 | Variable | Required | Default | Description |
 |----------|:--------:|---------|-------------|
-| `DATA_DIR` | ❌ | `./data` | Persistent data directory |
-| `REDIS_URL` | ❌ | `redis://localhost:6379/0` | Redis URL |
+| `DATA_DIR` | No | `./data` | Persistent data directory |
+| `REDIS_URL` | No | `redis://localhost:6379/0` | Redis URL |
 
 ---
 

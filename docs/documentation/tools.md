@@ -96,8 +96,8 @@ Set a timer that fires during or after the call.
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|:--------:|---------|-------------|
-| `duration` | integer | ✅ | - | Duration in seconds |
-| `message` | string | ❌ | `"Your timer is complete"` | Completion message |
+| `duration` | integer | Yes | - | Duration in seconds |
+| `message` | string | No | `"Your timer is complete"` | Completion message |
 
 ### 🗣️ Trigger Phrases
 
@@ -141,9 +141,9 @@ Schedule a callback - the assistant will call you back later.
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|:--------:|---------|-------------|
-| `delay` | integer | ❌ | `60` | Delay in seconds |
-| `message` | string | ❌ | `"This is your callback"` | Message to speak |
-| `destination` | string | ❌ | Current caller | Phone to call |
+| `delay` | integer | No | `60` | Delay in seconds |
+| `message` | string | No | `"This is your callback"` | Message to speak |
+| `destination` | string | No | Current caller | Phone to call |
 
 ### 🗣️ Trigger Phrases
 
@@ -229,7 +229,7 @@ Cancel pending timers or callbacks.
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|:--------:|---------|-------------|
-| `task_type` | string | ❌ | `"all"` | `"timer"`, `"callback"`, or `"all"` |
+| `task_type` | string | No | `"all"` | `"timer"`, `"callback"`, or `"all"` |
 
 ### 🗣️ Trigger Phrases
 
@@ -260,8 +260,8 @@ Get the current date and/or time.
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|:--------:|---------|-------------|
-| `format` | string | ❌ | `"datetime"` | Output format |
-| `timezone` | string | ❌ | System TZ | Timezone name |
+| `format` | string | No | `"datetime"` | Output format |
+| `timezone` | string | No | System TZ | Timezone name |
 
 ### 🎯 Format Options
 
@@ -293,7 +293,7 @@ Perform mathematical calculations.
 
 | Parameter | Type | Required | Description |
 |-----------|------|:--------:|-------------|
-| `expression` | string | ✅ | Math expression |
+| `expression` | string | Yes | Math expression |
 
 ### ➕ Supported Operations
 
@@ -342,7 +342,7 @@ Tell a random joke.
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|:--------:|---------|-------------|
-| `category` | string | ❌ | `"general"` | Joke category |
+| `category` | string | No | `"general"` | Joke category |
 
 ### 🎭 Categories
 
@@ -373,7 +373,7 @@ Repeat back exactly what the user says.
 
 | Parameter | Type | Required | Description |
 |-----------|------|:--------:|-------------|
-| `text` | string | ✅ | Exact text to repeat verbatim |
+| `text` | string | Yes | Exact text to repeat verbatim |
 
 ### 🗣️ Trigger Phrases
 
