@@ -1,14 +1,9 @@
 ---
-title: Getting Started
-excerpt: >-
-  Install and configure the SIP AI Assistant with step-by-step setup
-  instructions
-category:
-  uri: setup
-link:
-  new_tab: false
+title: "Getting Started"
+excerpt: "Install and configure the SIP AI Assistant with step-by-step setup instructions"
 slug: getting-started
 ---
+
 > 🤖 **ROBO CODED** — This documentation was made with AI and may not be 100% sane. But the code does work! 🎉
 
 # 🚀 Getting Started
@@ -28,7 +23,13 @@ Before you begin, ensure you have:
 
 ## ⚡ Quick Start
 
-<Accordion title="Step 1: Clone the Repository" icon="download">
+[block:callout]
+{
+  "type": "info",
+  "title": "Step 1: Clone the Repository",
+  "body": ""
+}
+[/block]
 
 ```bash
 git clone https://github.com/your-org/sip-agent.git
@@ -45,9 +46,13 @@ remote: Compressing objects: 100% (567/567), done.
 Receiving objects: 100% (1234/1234), 2.5 MiB | 10.00 MiB/s, done.
 ```
 
-</Accordion>
-
-<Accordion title="Step 2: Configure Environment" icon="cog">
+[block:callout]
+{
+  "type": "info",
+  "title": "Step 2: Configure Environment",
+  "body": ""
+}
+[/block]
 
 ```bash
 cp .env.example .env
@@ -81,11 +86,15 @@ LLM_MODEL=openai-community/gpt2-xl
 | RTX 3090/4080 (16-24GB) | `meta-llama/Llama-3.1-8B-Instruct` | `faster-whisper-medium` |
 | RTX 3080/4070 (10-12GB) | `Qwen/Qwen2.5-7B-Instruct` | `faster-whisper-small` |
 
-> 💡 **Tip:** See [Configuration Reference](configuration) for all available options and full model recommendations.
+> 💡 **Tip:** See [Configuration Reference](doc:configuration) for all available options and full model recommendations.
 
-</Accordion>
-
-<Accordion title="Step 3: Start the Services" icon="play">
+[block:callout]
+{
+  "type": "info",
+  "title": "Step 3: Start the Services",
+  "body": ""
+}
+[/block]
 
 ```bash
 docker compose up -d
@@ -100,12 +109,15 @@ docker compose up -d
  ✔ Container sip-agent            Started
 ```
 
-</Accordion>
+[block:callout]
+{
+  "type": "info",
+  "title": "Step 4: Verify Installation",
+  "body": ""
+}
+[/block]
 
-<Accordion title="Step 4: Verify Installation" icon="check">
-
-<Tabs>
-<Tab title="Health Check">
+**Health Check:**
 
 ```bash
 curl http://localhost:8080/health | jq
@@ -121,9 +133,7 @@ curl http://localhost:8080/health | jq
 }
 ```
 
-</Tab>
-
-<Tab title="SIP Registration">
+**SIP Registration:**
 
 ```bash
 curl http://localhost:8080/health | jq '.sip_registered'
@@ -135,9 +145,7 @@ curl http://localhost:8080/health | jq '.sip_registered'
 true
 ```
 
-</Tab>
-
-<Tab title="Available Tools">
+**Available Tools:**
 
 ```bash
 curl http://localhost:8080/tools | jq '.[].name'
@@ -158,12 +166,13 @@ curl http://localhost:8080/tools | jq '.[].name'
 "SIMON_SAYS"
 ```
 
-</Tab>
-</Tabs>
-
-</Accordion>
-
-<Accordion title="Step 5: Make a Test Call 📞" icon="phone">
+[block:callout]
+{
+  "type": "success",
+  "title": "Step 5: Make a Test Call 📞",
+  "body": ""
+}
+[/block]
 
 1. Open your SIP phone or softphone
 2. Dial the extension assigned to the assistant
@@ -185,8 +194,6 @@ curl http://localhost:8080/tools | jq '.[].name'
 │ 🤖 "Goodbye! Have a great day!"                           │
 └────────────────────────────────────────────────────────────┘
 ```
-
-</Accordion>
 
 ## 🐳 Docker Compose Configuration
 
@@ -264,8 +271,7 @@ sip-agent/
 
 ## 📞 PBX Configuration
 
-<Tabs>
-<Tab title="FreePBX / Asterisk">
+### FreePBX / Asterisk
 
 1. Navigate to **Applications → Extensions**
 2. Click **Add Extension → Add New SIP Extension**
@@ -283,22 +289,16 @@ SIP_PASSWORD=your-extension-secret
 SIP_DOMAIN=192.168.1.100  # Your PBX IP
 ```
 
-</Tab>
-
-<Tab title="3CX">
+### 3CX
 
 1. Go to **Users → Add**
 2. Select **Extension Type:** SIP
 3. Configure authentication credentials
 4. Note the extension number and password
 
-</Tab>
-</Tabs>
-
 ## 🔍 Viewing Logs
 
-<Tabs>
-<Tab title="Docker Logs">
+### Docker Logs
 
 ```bash
 docker logs -f sip-agent
@@ -313,9 +313,7 @@ docker logs -f sip-agent
 {"ts": "2025-11-30 15:30:07", "level": "INFO", "event": "llm_response", "msg": "It's 3:30 PM..."}
 ```
 
-</Tab>
-
-<Tab title="Formatted Log Viewer">
+### Formatted Log Viewer
 
 ```bash
 python tools/view-logs.py -f
@@ -336,12 +334,9 @@ python tools/view-logs.py -f
 15:30:15  📴 Call ended (duration: 0:10)
 ```
 
-</Tab>
-</Tabs>
-
 ## 🔧 Troubleshooting
 
-<Accordion title="SIP Not Registering" icon="exclamation-triangle">
+### SIP Not Registering
 
 ```bash
 # Check SIP logs
@@ -353,9 +348,7 @@ docker logs sip-agent 2>&1 | grep -i "sip\|register"
 - 🔥 Firewall blocking UDP 5060
 - 🌐 Wrong `SIP_DOMAIN`
 
-</Accordion>
-
-<Accordion title="No Audio" icon="volume-mute">
+### No Audio
 
 ```bash
 # Test Speaches health
@@ -379,9 +372,7 @@ aplay test.wav  # Linux
 afplay test.wav # macOS
 ```
 
-</Accordion>
-
-<Accordion title="LLM Not Responding" icon="robot">
+### LLM Not Responding
 
 ```bash
 # Test LLM endpoint
@@ -397,21 +388,9 @@ curl http://your-llm-server:8000/v1/models | jq
 }
 ```
 
-</Accordion>
-
 ## ➡️ Next Steps
 
-<Cards columns="2">
-  <Card title="Configuration" href="configuration" icon="cog">
-    All environment variables and detailed configuration options
-  </Card>
-  <Card title="API Reference" href="api-reference" icon="code">
-    Complete REST API documentation and endpoints
-  </Card>
-  <Card title="Built-in Tools" href="tools" icon="tools">
-    Explore all available AI assistant capabilities
-  </Card>
-  <Card title="Creating Plugins" href="plugins" icon="plug">
-    Learn how to add custom tools and functionality
-  </Card>
-</Cards>
+- **[Configuration](doc:configuration)** — All environment variables and detailed configuration options
+- **[API Reference](doc:api-reference)** — Complete REST API documentation and endpoints
+- **[Built-in Tools](doc:tools)** — Explore all available AI assistant capabilities
+- **[Creating Plugins](doc:plugins)** — Learn how to add custom tools and functionality

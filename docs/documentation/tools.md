@@ -1,8 +1,6 @@
 ---
 title: "Built-in Tools"
 excerpt: "Available tools for the voice assistant"
-category:
-  uri: features
 slug: tools
 ---
 
@@ -13,7 +11,6 @@ slug: tools
 The SIP AI Assistant includes several built-in tools that the LLM can invoke during conversations.
 
 ![Tools demo](screenshots/tools-demo.png)
-<!-- TODO: Screenshot of log viewer showing tool execution -->
 
 ---
 
@@ -437,7 +434,7 @@ The LLM invokes tools using this format:
 
 ## 🔌 Creating Custom Tools
 
-Want to add your own tools? See [Creating Plugins](plugins).
+Want to add your own tools? See [Creating Plugins](doc:plugins).
 
 ```python
 # Example: Hello World tool

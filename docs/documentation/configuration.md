@@ -1,8 +1,6 @@
 ---
 title: "Configuration"
 excerpt: "Complete configuration reference"
-category:
-  uri: setup
 slug: configuration
 ---
 
@@ -313,7 +311,6 @@ BARGE_IN_ENERGY_THRESHOLD=2000
 4. Find your station ID in the URL
 
 ![Tempest API settings](screenshots/tempest-api.png)
-<!-- TODO: Screenshot of Tempest API token page -->
 
 **Example:**
 
@@ -622,7 +619,6 @@ grafana/dashboards/sip-agent.json
 ```
 
 ![Grafana dashboard](screenshots/grafana-dashboard.png)
-<!-- TODO: Screenshot of Grafana dashboard -->
 
 **Metrics available:**
 

@@ -1,8 +1,6 @@
 ---
 title: "API Reference"
 excerpt: "REST API endpoints for the SIP AI Assistant"
-category:
-  uri: api
 slug: api-reference
 ---
 
@@ -17,7 +15,6 @@ The SIP AI Assistant exposes a REST API for initiating calls, executing tools, a
 > 💡 **Interactive Docs:** Visit `http://your-server:8080/docs` for Swagger UI
 
 ![Swagger UI](screenshots/swagger-ui.png)
-<!-- TODO: Screenshot of FastAPI Swagger docs -->
 
 ---
 

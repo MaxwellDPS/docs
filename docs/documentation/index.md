@@ -1,8 +1,6 @@
 ---
 title: "SIP AI Assistant"
 excerpt: "Voice-powered AI assistant for SIP phone systems"
-category:
-  uri: overview
 slug: overview
 ---
 
@@ -13,7 +11,6 @@ slug: overview
 A voice-powered AI assistant that answers phone calls, understands natural language, and can perform actions like setting timers, checking weather, scheduling callbacks, and more.
 
 ![Assistant architecture diagram](screenshots/architecture.png)
-<!-- TODO: Architecture diagram showing SIP phone -> Agent -> LLM/STT/TTS flow -->
 
 ---
 
@@ -117,7 +114,6 @@ sequenceDiagram
 > 🤖 *"At Storm Lake, as of 9:30 pm, it's 44 degrees with foggy conditions. Wind is calm."*
 
 ![Example conversation flow](screenshots/conversation-flow.png)
-<!-- TODO: Screenshot of log viewer showing a weather query conversation -->
 
 ---
 
@@ -153,7 +149,6 @@ Quick reference for GPU-specific configurations. See [Configuration](configurati
 ## 🎬 Demo
 
 ![Demo video thumbnail](screenshots/demo-video.png)
-<!-- TODO: Video thumbnail or animated GIF showing a call in progress -->
 
 ```
 # Example call flow
@@ -175,12 +170,12 @@ Quick reference for GPU-specific configurations. See [Configuration](configurati
 
 ## 📚 Documentation
 
-1. [🚀 Getting Started](getting-started) — Installation & setup
-2. [⚙️ Configuration](configuration) — Environment variables
-3. [🌐 API Reference](api-reference) — REST API endpoints
-4. [🔧 Built-in Tools](tools) — Available capabilities
-5. [🔌 Creating Plugins](plugins) — Add custom tools
-6. [📖 Examples](examples) — Integration patterns
+1. [🚀 Getting Started](doc:getting-started) — Installation & setup
+2. [⚙️ Configuration](doc:configuration) — Environment variables
+3. [🌐 API Reference](doc:api-reference) — REST API endpoints
+4. [🔧 Built-in Tools](doc:tools) — Available capabilities
+5. [🔌 Creating Plugins](doc:plugins) — Add custom tools
+6. [📖 Examples](doc:examples) — Integration patterns
 
 ---
 

@@ -1,8 +1,6 @@
 ---
 title: "Examples"
 excerpt: "Common use cases and integration examples"
-category:
-  uri: guides
 slug: examples
 ---
 
@@ -13,7 +11,6 @@ slug: examples
 Real-world examples and integration patterns for the SIP AI Assistant.
 
 ![Integrations overview](screenshots/integrations.png)
-<!-- TODO: Diagram showing integrations -->
 
 ---
 
@@ -67,7 +64,6 @@ curl -X POST http://sip-agent:8080/schedule \
 ```
 
 ![Scheduled weather call](screenshots/scheduled-weather.png)
-<!-- TODO: Screenshot of log viewer showing scheduled call -->
 
 ---
 
@@ -146,9 +142,8 @@ async def handle_appointment_webhook(payload: dict):
 Trigger a weather call when leaving home:
 
 ![Home Assistant automation](screenshots/home-assistant-automation.png)
-<!-- TODO: Screenshot of Home Assistant automation UI -->
 
-### `automations.yaml`
+### automations.yaml
 
 ```yaml
 automation:
@@ -167,7 +162,7 @@ automation:
       - service: rest_command.weather_call
 ```
 
-### `configuration.yaml`
+### configuration.yaml
 
 ```yaml
 rest_command:
@@ -224,7 +219,7 @@ curl -X POST http://sip-agent:8080/call \
 
 ### Alertmanager Integration
 
-**`alertmanager.yml`:**
+**alertmanager.yml:**
 
 ```yaml
 receivers:
@@ -354,7 +349,7 @@ curl http://sip-agent:8080/schedule | jq
 
 Use system cron for flexible scheduling:
 
-**`/etc/cron.d/weather-calls`:**
+**/etc/cron.d/weather-calls:**
 
 ```bash
 # ┌───────────── minute (0-59)
@@ -388,7 +383,6 @@ Use system cron for flexible scheduling:
 Create a workflow that calls when a form is submitted:
 
 ![n8n workflow](screenshots/n8n-workflow.png)
-<!-- TODO: Screenshot of n8n workflow -->
 
 **Workflow JSON:**
 
@@ -553,7 +547,6 @@ if __name__ == "__main__":
 Configure Grafana to call via webhook:
 
 ![Grafana alerting](screenshots/grafana-alerting.png)
-<!-- TODO: Screenshot of Grafana contact point configuration -->
 
 **Contact Point (YAML):**
 

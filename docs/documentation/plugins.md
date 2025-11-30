@@ -1,8 +1,6 @@
 ---
 title: "Creating Plugins"
 excerpt: "Build custom tools for the voice assistant"
-category:
-  uri: development
 slug: plugins
 ---
 
@@ -13,7 +11,6 @@ slug: plugins
 Extend the SIP AI Assistant with custom tools by creating Python plugins.
 
 ![Plugin code](screenshots/plugin-code.png)
-<!-- TODO: Screenshot of VS Code with a plugin file open -->
 
 ---
 
@@ -140,7 +137,6 @@ curl -X POST http://localhost:8080/tools/HELLO/execute \
 ```
 
 ![Plugin test](screenshots/plugin-test.png)
-<!-- TODO: Screenshot of terminal showing plugin test -->
 
 ---
 
