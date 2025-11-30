@@ -1,13 +1,14 @@
 ---
-title: 📞⚡ General Dissarray
-excerpt: 🤖 Voice-powered AI assistant for SIP phone systems
+title: '📞⚡ General Disarray '
+excerpt: '🤖 Voice-powered AI assistant for SIP phone systems by CHAOS.CORP '
+icon: 📞
 slug: overview
 ---
 <Callout icon="🤖" theme="default">
-  ### **ROBO CODED** — This documentation was made with AI and may not be 100% sane. But the code does work! 🎉
+   **ROBO CODED** — This documentation was made with AI and may not be 100% sane. But the code does work! 🎉
 </Callout>
 
-# 📞 SIP AI Assistant
+# 📞General Disarray - SIP AI Assistant
 
 A voice-powered AI assistant that answers phone calls, understands natural language, and can perform actions like setting timers, checking weather, scheduling callbacks, and more.
 
@@ -168,3 +169,5 @@ curl http://localhost:8080/health
 * 📖 [Documentation](https://docs.example.com)
 * 🐛 [Issue Tracker](https://github.com/your-org/sip-agent/issues)
 * 💬 [Discussions](https://github.com/your-org/sip-agent/discussions)
+
+<br />
