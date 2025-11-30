@@ -28,6 +28,7 @@ A voice-powered AI assistant that answers phone calls, understands natural langu
 | 🌐 **REST API** | Initiate outbound calls, execute tools, schedule calls |
 | 🔗 **Webhooks** | Trigger calls from Home Assistant, n8n, and more |
 | ⏰ **Scheduled Calls** | One-time or recurring calls (daily briefings, reminders) |
+| 🗣️ **Custom Phrases** | Customize greetings, goodbyes, and responses via config |
 | 📊 **Observability** | Prometheus metrics, OpenTelemetry tracing, JSON logs |
 
 ---

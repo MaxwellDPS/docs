@@ -237,6 +237,169 @@ OTEL_SERVICE_NAME=sip-agent
 
 ---
 
+## 🗣️ Phrases Configuration
+
+Customize the assistant's pre-generated phrases for greetings, goodbyes, acknowledgments, and more.
+
+### Configuration Methods
+
+**Method 1: Environment Variables (JSON array)**
+
+```env
+PHRASES_GREETINGS=["Hello! How can I help?","Hi there!","Hey!"]
+PHRASES_GOODBYES=["Goodbye!","Take care!","See ya!"]
+```
+
+**Method 2: Environment Variables (comma-separated)**
+
+```env
+PHRASES_GREETINGS=Hello! How can I help?,Hi there!,Hey!
+PHRASES_GOODBYES=Goodbye!,Take care!,See ya!
+```
+
+**Method 3: JSON File** (recommended for complex setups)
+
+Create `data/phrases.json`:
+
+```json
+{
+  "greetings": [
+    "Hello! How can I help you today?",
+    "Hi there! What can I do for you?",
+    "Hey! What do you need?"
+  ],
+  "goodbyes": [
+    "Goodbye!",
+    "Take care!",
+    "Have a great day!"
+  ],
+  "acknowledgments": [
+    "Okay.",
+    "Got it.",
+    "One moment.",
+    "Sure.",
+    "Copy that."
+  ],
+  "thinking": [
+    "Let me check.",
+    "One moment.",
+    "Working on it."
+  ],
+  "errors": [
+    "Sorry, I didn't catch that.",
+    "Could you repeat that please?",
+    "I didn't quite get that."
+  ],
+  "followups": [
+    "Is there anything else I can help with?",
+    "Can I help with anything else?",
+    "Anything else?"
+  ],
+  "precache_extra": [
+    "Hello",
+    "Goodbye",
+    "Yes",
+    "No",
+    "Thank you"
+  ]
+}
+```
+
+### Phrase Categories
+
+| Variable | Category | Description |
+|----------|----------|-------------|
+| `PHRASES_GREETINGS` | 👋 Greetings | Played when call is answered |
+| `PHRASES_GOODBYES` | 👋 Goodbyes | Played when ending call |
+| `PHRASES_ACKNOWLEDGMENTS` | ✅ Acknowledgments | Quick responses while processing |
+| `PHRASES_THINKING` | 🤔 Thinking | Played while waiting for LLM |
+| `PHRASES_ERRORS` | ❌ Errors | Played when speech not understood |
+| `PHRASES_FOLLOWUPS` | 🔄 Follow-ups | Played after completing a task |
+| `PHRASES_PRECACHE` | ⚡ Pre-cache | Additional phrases to pre-synthesize |
+
+### Example: Custom Personality
+
+**Friendly Assistant:**
+
+```json
+{
+  "greetings": [
+    "Hey there, friend! What can I do for you?",
+    "Hello! I'm so happy to help!",
+    "Hi! Ready when you are!"
+  ],
+  "goodbyes": [
+    "Take care! Talk soon!",
+    "Bye bye! Have an awesome day!",
+    "See you later, alligator!"
+  ]
+}
+```
+
+**Professional Assistant:**
+
+```json
+{
+  "greetings": [
+    "Good day. How may I assist you?",
+    "Hello. What can I help you with today?",
+    "Greetings. Please state your request."
+  ],
+  "goodbyes": [
+    "Thank you for calling. Goodbye.",
+    "Have a pleasant day. Goodbye.",
+    "Thank you. Take care."
+  ]
+}
+```
+
+**Sassy Robot:**
+
+```json
+{
+  "greetings": [
+    "Beep boop! What do you want, human?",
+    "State your business, meatbag!",
+    "Oh great, another call. What is it?"
+  ],
+  "goodbyes": [
+    "Finally! Goodbye!",
+    "Don't let the door hit you!",
+    "Bye! Try not to miss me too much!"
+  ],
+  "errors": [
+    "Did you just make a sound? Try again.",
+    "My audio sensors must be malfunctioning.",
+    "I'm sorry, I don't speak mumble."
+  ]
+}
+```
+
+### Pre-caching Behavior
+
+All configured phrases are automatically pre-synthesized at startup for instant playback:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ 🚀 Startup                                                  │
+├─────────────────────────────────────────────────────────────┤
+│ 📄 Load phrases from config                                 │
+│ 🎤 Pre-synthesize all phrases via TTS                      │
+│ 💾 Cache audio in memory                                    │
+│ ⚡ Ready for instant playback!                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Startup log:**
+
+```
+INFO: Pre-caching 25 phrases...
+INFO: Cached 25 phrases
+INFO: Speaches TTS ready, 25 phrases cached
+```
+
+---
+
 ## 📋 Complete Example
 
 ```env
@@ -306,6 +469,16 @@ OTEL_SERVICE_NAME=sip-agent
 # 💾 Storage
 # ──────────────────────────────────────────────────────────────────────────────
 DATA_DIR=./data
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 🗣️ Phrases (Optional - or use data/phrases.json)
+# ──────────────────────────────────────────────────────────────────────────────
+# PHRASES_GREETINGS=["Hello! How can I help?","Hi there!","Hey!"]
+# PHRASES_GOODBYES=["Goodbye!","Take care!","Have a great day!"]
+# PHRASES_ACKNOWLEDGMENTS=["Okay.","Got it.","One moment."]
+# PHRASES_THINKING=["Let me check.","One moment."]
+# PHRASES_ERRORS=["Sorry, I didn't catch that.","Could you repeat that?"]
+# PHRASES_FOLLOWUPS=["Anything else?","Can I help with anything else?"]
 ```
 
 ---
