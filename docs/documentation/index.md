@@ -32,19 +32,52 @@ A voice-powered AI assistant that answers phone calls, understands natural langu
 
 ## 🏗️ Architecture
 
+```mermaid
+flowchart LR
+    subgraph Caller
+        Phone[📱 SIP Phone]
+    end
+    
+    subgraph Agent["🤖 SIP AI Agent"]
+        SIP[SIP Client]
+        Audio[Audio Pipeline]
+        Tools[Tool Manager]
+        API[REST API]
+    end
+    
+    subgraph Services
+        LLM[🧠 LLM Server<br/>OpenAI / vLLM / Ollama]
+        Speaches[🎤 Speaches<br/>STT + TTS]
+    end
+    
+    subgraph Integrations
+        HA[🏠 Home Assistant]
+        N8N[🔄 n8n]
+        Webhook[🔗 Webhooks]
+    end
+    
+    Phone <-->|SIP/RTP| SIP
+    SIP <--> Audio
+    Audio <-->|Whisper| Speaches
+    Audio <-->|Kokoro| Speaches
+    Audio <--> Tools
+    Tools <-->|OpenAI API| LLM
+    
+    API <--> Tools
+    HA -->|HTTP| API
+    N8N -->|HTTP| API
+    Webhook -->|HTTP| API
 ```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   📱 SIP Phone  │────▶│  🤖 SIP Agent   │────▶│   🧠 LLM Server │
-│    (Caller)     │◀────│                 │◀────│   (OpenAI/vLLM) │
-└─────────────────┘     └────────┬────────┘     └─────────────────┘
-                                 │
-                        ┌────────┴────────┐
-                        ▼                 ▼
-                  ┌──────────┐      ┌──────────┐
-                  │ 🎤 Speaches │    │ 🔧 Tools │
-                  │  STT+TTS  │      │ Plugins  │
-                  └──────────┘      └──────────┘
-```
+
+**Component Overview:**
+
+| Component | Description |
+|-----------|-------------|
+| 📱 **SIP Phone** | Any SIP-compatible phone or softphone |
+| 🤖 **SIP AI Agent** | Core application handling calls and conversations |
+| 🧠 **LLM Server** | Language model for understanding and responses |
+| 🎤 **Speaches** | Unified STT (Whisper) and TTS (Kokoro) server |
+| 🔗 **Integrations** | External systems that trigger calls via API |
 
 ---
 
@@ -54,14 +87,26 @@ Call the assistant and say:
 
 > 🗣️ *"What's the weather like?"*
 
-**What happens:**
-
-```
-1. 🎤 Speech transcribed via Whisper
-2. 📤 Text sent to LLM
-3. 🔧 LLM invokes WEATHER tool
-4. 🌡️ Tool fetches Tempest station data
-5. 🔊 Response synthesized and played back
+```mermaid
+sequenceDiagram
+    participant User as 👤 User
+    participant Agent as 🤖 SIP Agent
+    participant STT as 🎤 Speaches
+    participant LLM as 🧠 LLM
+    participant Tool as 🌤️ Weather Tool
+    
+    User->>Agent: "What's the weather like?"
+    Agent->>STT: Audio stream
+    STT-->>Agent: Transcribed text
+    Agent->>LLM: User query + context
+    LLM-->>Agent: [TOOL:WEATHER]
+    Agent->>Tool: Execute
+    Tool-->>Agent: Weather data
+    Agent->>LLM: Tool result
+    LLM-->>Agent: Natural response
+    Agent->>STT: Text to speech
+    STT-->>Agent: Audio
+    Agent->>User: "At Storm Lake, it's 44°..."
 ```
 
 **Assistant responds:**
