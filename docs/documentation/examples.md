@@ -1,5 +1,5 @@
 ---
-title: "Examples"
+title: "📖 Examples"
 excerpt: "Common use cases and integration examples"
 slug: examples
 ---

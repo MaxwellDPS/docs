@@ -1,5 +1,5 @@
 ---
-title: "Creating Plugins"
+title: "🔌 Creating Plugins"
 excerpt: "Build custom tools for the voice assistant"
 slug: plugins
 ---

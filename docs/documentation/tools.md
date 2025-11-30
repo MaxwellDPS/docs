@@ -1,5 +1,5 @@
 ---
-title: "Built-in Tools"
+title: "🔧 Built-in Tools"
 excerpt: "Available tools for the voice assistant"
 slug: tools
 ---

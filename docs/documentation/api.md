@@ -1,5 +1,5 @@
 ---
-title: "API Reference"
+title: "🌐 API Reference"
 excerpt: "REST API endpoints for the SIP AI Assistant"
 slug: api-reference
 ---

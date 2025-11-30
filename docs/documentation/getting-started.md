@@ -1,5 +1,5 @@
 ---
-title: "Getting Started"
+title: "🚀 Getting Started"
 excerpt: "Install and configure the SIP AI Assistant with step-by-step setup instructions"
 slug: getting-started
 ---
@@ -18,18 +18,10 @@ Before you begin, ensure you have:
 |-------------|-------------|
 | 🐳 **Docker** | Docker and Docker Compose installed |
 | 📞 **SIP Server** | FreePBX, Asterisk, 3CX, or any SIP-compatible PBX |
-| 🧠 **LLM Server** | OpenAI API, vLLM, Ollama, or LM Studio |
-| 🎤 **Speaches** | [Speaches](https://github.com/speaches-ai/speaches) for STT/TTS |
 
 ## ⚡ Quick Start
 
-[block:callout]
-{
-  "type": "info",
-  "title": "Step 1: Clone the Repository",
-  "body": ""
-}
-[/block]
+> 📘 **Step 1: Clone the Repository**
 
 ```bash
 git clone https://github.com/your-org/sip-agent.git
@@ -46,13 +38,7 @@ remote: Compressing objects: 100% (567/567), done.
 Receiving objects: 100% (1234/1234), 2.5 MiB | 10.00 MiB/s, done.
 ```
 
-[block:callout]
-{
-  "type": "info",
-  "title": "Step 2: Configure Environment",
-  "body": ""
-}
-[/block]
+> 📘 **Step 2: Configure Environment**
 
 ```bash
 cp .env.example .env
@@ -88,13 +74,7 @@ LLM_MODEL=openai-community/gpt2-xl
 
 > 💡 **Tip:** See [Configuration Reference](doc:configuration) for all available options and full model recommendations.
 
-[block:callout]
-{
-  "type": "info",
-  "title": "Step 3: Start the Services",
-  "body": ""
-}
-[/block]
+> 📘 **Step 3: Start the Services**
 
 ```bash
 docker compose up -d
@@ -109,13 +89,7 @@ docker compose up -d
  ✔ Container sip-agent            Started
 ```
 
-[block:callout]
-{
-  "type": "info",
-  "title": "Step 4: Verify Installation",
-  "body": ""
-}
-[/block]
+> 📘 **Step 4: Verify Installation**
 
 **Health Check:**
 
@@ -166,13 +140,7 @@ curl http://localhost:8080/tools | jq '.[].name'
 "SIMON_SAYS"
 ```
 
-[block:callout]
-{
-  "type": "success",
-  "title": "Step 5: Make a Test Call 📞",
-  "body": ""
-}
-[/block]
+> ✅ **Step 5: Make a Test Call 📞**
 
 1. Open your SIP phone or softphone
 2. Dial the extension assigned to the assistant
@@ -195,79 +163,10 @@ curl http://localhost:8080/tools | jq '.[].name'
 └────────────────────────────────────────────────────────────┘
 ```
 
-## 🐳 Docker Compose Configuration
-
-Here's a complete `docker-compose.yml`:
-
-```yaml
-services:
-  # 🤖 SIP AI Assistant
-  sip-agent:
-    image: sip-agent:latest
-    build: ./sip-agent
-    container_name: sip-agent
-    network_mode: host  # Required for SIP/RTP
-    environment:
-      - SIP_USER=${SIP_USER}
-      - SIP_PASSWORD=${SIP_PASSWORD}
-      - SIP_DOMAIN=${SIP_DOMAIN}
-      - SPEACHES_API_URL=${SPEACHES_API_URL}
-      - LLM_BASE_URL=${LLM_BASE_URL}
-      - LLM_MODEL=${LLM_MODEL}
-      - TEMPEST_STATION_ID=${TEMPEST_STATION_ID}
-      - TEMPEST_API_TOKEN=${TEMPEST_API_TOKEN}
-    volumes:
-      - ./data:/app/data
-    restart: unless-stopped
-    depends_on:
-      - speaches
-
-  # 🎤 Speaches (STT + TTS)
-  speaches:
-    image: ghcr.io/speaches-ai/speaches:latest
-    container_name: speaches
-    ports:
-      - "8001:8000"
-    environment:
-      - WHISPER_MODEL=Systran/faster-distil-whisper-small.en
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-    restart: unless-stopped
-```
+## 🐳 Docker Networking Configuration
 
 > ⚠️ **Note:** The SIP agent uses `network_mode: host` for proper SIP/RTP handling.
 
-## 📁 Directory Structure
-
-```
-sip-agent/
-├── 📂 src/
-│   ├── 📄 main.py              # Application entry point
-│   ├── 📄 config.py            # Configuration management
-│   ├── 📄 api.py               # REST API endpoints
-│   ├── 📄 sip_client.py        # SIP protocol handling
-│   ├── 📄 audio_pipeline.py    # STT/TTS processing
-│   ├── 📄 llm_engine.py        # LLM integration
-│   ├── 📄 tool_manager.py      # Tool execution
-│   └── 📂 plugins/             # Tool plugins
-│       ├── 📄 weather_tool.py
-│       ├── 📄 timer_tool.py
-│       ├── 📄 callback_tool.py
-│       └── 📄 ...
-├── 📂 tools/
-│   └── 📄 view-logs.py         # Log viewer utility
-├── 📂 grafana/
-│   └── 📂 dashboards/          # Grafana dashboards
-├── 📄 docker-compose.yml
-├── 📄 Dockerfile
-├── 📄 .env.example
-└── 📄 requirements.txt
-```
 
 ## 📞 PBX Configuration
 
