@@ -1,204 +1,402 @@
 ---
 title: "Getting Started"
 excerpt: "Install and configure the SIP AI Assistant"
-category: "Setup"
-slug: "getting-started"
+category:
+  uri: setup
+slug: getting-started
 ---
 
-# Getting Started
+# 🚀 Getting Started
 
 This guide walks you through setting up the SIP AI Assistant.
 
-## Prerequisites
+---
 
-- Docker and Docker Compose
-- A SIP server (FreePBX, Asterisk, or any SIP-compatible PBX)
-- An LLM server (vLLM, LM Studio, OpenAI API, etc.)
-- A Whisper-compatible STT server (Speaches, Whisper.cpp, etc.)
-- A TTS server (XTTS, Piper, Fish Speech, etc.)
+## 📋 Prerequisites
 
-## Quick Start with Docker Compose
+Before you begin, ensure you have:
 
-### 1. Clone the Repository
+| Requirement | Description |
+|-------------|-------------|
+| 🐳 **Docker** | Docker and Docker Compose installed |
+| 📞 **SIP Server** | FreePBX, Asterisk, 3CX, or any SIP-compatible PBX |
+| 🧠 **LLM Server** | OpenAI API, vLLM, Ollama, or LM Studio |
+| 🎤 **Speaches** | [Speaches](https://github.com/speaches-ai/speaches) for STT/TTS |
+
+---
+
+## ⚡ Quick Start
+
+### Step 1: Clone the Repository
 
 ```bash
 git clone https://github.com/your-org/sip-agent.git
 cd sip-agent
 ```
 
-### 2. Configure Environment
+**Expected output:**
 
-Copy the example environment file and edit it:
+```
+Cloning into 'sip-agent'...
+remote: Enumerating objects: 1234, done.
+remote: Counting objects: 100% (1234/1234), done.
+remote: Compressing objects: 100% (567/567), done.
+Receiving objects: 100% (1234/1234), 2.5 MiB | 10.00 MiB/s, done.
+```
+
+---
+
+### Step 2: Configure Environment
 
 ```bash
 cp .env.example .env
-nano .env
+nano .env  # or use your preferred editor
 ```
 
-Minimum required configuration:
+**Minimum configuration:**
 
 ```env
-# SIP Settings
-SIP_USERNAME=assistant
-SIP_PASSWORD=your-password
-SIP_DOMAIN=your-pbx.local
+# 📞 SIP Settings
+SIP_USER=ai-assistant
+SIP_PASSWORD=your-secure-password
+SIP_DOMAIN=pbx.example.com
 
-# LLM Settings
-LLM_BASE_URL=http://your-llm-server:8000/v1
-LLM_MODEL=your-model-name
+# 🎤 Speaches (STT + TTS)
+SPEACHES_API_URL=http://speaches:8001
 
-# STT Settings (Whisper)
-STT_BASE_URL=http://your-whisper-server:8000/v1
-
-# TTS Settings
-TTS_BASE_URL=http://your-tts-server:8000
-TTS_VOICE=default
+# 🧠 LLM Settings
+LLM_BASE_URL=http://vllm:8000/v1
+LLM_MODEL=openai-community/gpt2-xl
 ```
 
-### 3. Start the Service
+> 💡 **Tip:** See [Configuration Reference](configuration) for all available options.
+
+---
+
+### Step 3: Start the Services
 
 ```bash
 docker compose up -d
 ```
 
-### 4. Verify It's Running
+**Expected output:**
 
-Check the health endpoint:
-
-```bash
-curl http://localhost:8080/health
+```
+[+] Running 3/3
+ ✔ Network sip-agent_default      Created
+ ✔ Container speaches             Started
+ ✔ Container sip-agent            Started
 ```
 
-Expected response:
+---
+
+### Step 4: Verify Installation
+
+#### Check health endpoint:
+
+```bash
+curl http://localhost:8080/health | jq
+```
+
+**Expected output:**
 
 ```json
 {
   "status": "healthy",
   "sip_registered": true,
-  "queue": {
-    "pending": 0,
-    "active": 0,
-    "max_concurrent": 1
-  }
+  "active_calls": 0
 }
 ```
 
-### 5. Make a Test Call
+![Health check response](screenshots/health-check.png)
+<!-- TODO: Screenshot of terminal with health check output -->
 
-From your SIP phone, dial the extension assigned to the assistant. You should hear a greeting and can start talking!
+#### Check SIP registration:
 
-## Docker Compose Configuration
+```bash
+curl http://localhost:8080/health | jq '.sip_registered'
+```
 
-Here's a complete `docker-compose.yml` example:
+**Expected output:**
+
+```
+true
+```
+
+#### List available tools:
+
+```bash
+curl http://localhost:8080/tools | jq '.[].name'
+```
+
+**Expected output:**
+
+```
+"WEATHER"
+"SET_TIMER"
+"CALLBACK"
+"HANGUP"
+"STATUS"
+"CANCEL"
+"DATETIME"
+"CALC"
+"JOKE"
+```
+
+![Tools list](screenshots/tools-list.png)
+<!-- TODO: Screenshot of tools list output -->
+
+---
+
+### Step 5: Make a Test Call 📞
+
+1. Open your SIP phone or softphone
+2. Dial the extension assigned to the assistant
+3. Wait for the greeting
+4. Say *"Hello!"* or *"What time is it?"*
+
+![Test call](screenshots/test-call.png)
+<!-- TODO: Screenshot of softphone making a call -->
+
+**Example conversation:**
+
+```
+┌────────────────────────────────────────────────────────────┐
+│ 📞 INCOMING CALL                                           │
+├────────────────────────────────────────────────────────────┤
+│ 🤖 "Hello! Welcome to the AI assistant. How can I help?"  │
+│ 👤 "What time is it?"                                      │
+│ 🤖 "It's 3:45 PM on Saturday, November 30th, 2025."       │
+│ 👤 "Thanks!"                                               │
+│ 🤖 "You're welcome! Anything else?"                       │
+│ 👤 "No, goodbye"                                           │
+│ 🤖 "Goodbye! Have a great day!"                           │
+└────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🐳 Docker Compose Configuration
+
+Here's a complete `docker-compose.yml`:
 
 ```yaml
-version: '3.8'
-
 services:
+  # 🤖 SIP AI Assistant
   sip-agent:
     image: sip-agent:latest
     build: ./sip-agent
     container_name: sip-agent
-    ports:
-      - "8080:8080"      # API
-      - "5060:5060/udp"  # SIP
-      - "10000-10100:10000-10100/udp"  # RTP
+    network_mode: host  # Required for SIP/RTP
     environment:
-      - SIP_USERNAME=${SIP_USERNAME}
+      - SIP_USER=${SIP_USER}
       - SIP_PASSWORD=${SIP_PASSWORD}
       - SIP_DOMAIN=${SIP_DOMAIN}
+      - SPEACHES_API_URL=${SPEACHES_API_URL}
       - LLM_BASE_URL=${LLM_BASE_URL}
       - LLM_MODEL=${LLM_MODEL}
-      - STT_BASE_URL=${STT_BASE_URL}
-      - TTS_BASE_URL=${TTS_BASE_URL}
+      - TEMPEST_STATION_ID=${TEMPEST_STATION_ID}
+      - TEMPEST_API_TOKEN=${TEMPEST_API_TOKEN}
     volumes:
-      - ./plugins:/app/plugins  # Custom plugins
+      - ./data:/app/data
     restart: unless-stopped
+    depends_on:
+      - speaches
 
-  # Optional: Prometheus metrics
-  prometheus:
-    image: prom/prometheus:latest
+  # 🎤 Speaches (STT + TTS)
+  speaches:
+    image: ghcr.io/speaches-ai/speaches:latest
+    container_name: speaches
     ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - "8001:8000"
+    environment:
+      - WHISPER_MODEL=Systran/faster-distil-whisper-small.en
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
 ```
 
-## Directory Structure
+> ⚠️ **Note:** The SIP agent uses `network_mode: host` for proper SIP/RTP handling.
+
+---
+
+## 📁 Directory Structure
 
 ```
 sip-agent/
-├── src/
-│   ├── main.py           # Application entry point
-│   ├── config.py         # Configuration management
-│   ├── api.py            # REST API endpoints
-│   ├── sip_handler.py    # SIP protocol handling
-│   ├── audio_pipeline.py # STT/TTS processing
-│   ├── llm_engine.py     # LLM integration
-│   ├── tool_manager.py   # Tool execution
-│   └── plugins/          # Built-in tool plugins
-│       ├── weather_tool.py
-│       ├── timer_tool.py
-│       ├── callback_tool.py
-│       └── ...
-├── docker-compose.yml
-├── Dockerfile
-├── .env.example
-└── requirements.txt
+├── 📂 src/
+│   ├── 📄 main.py              # Application entry point
+│   ├── 📄 config.py            # Configuration management
+│   ├── 📄 api.py               # REST API endpoints
+│   ├── 📄 sip_client.py        # SIP protocol handling
+│   ├── 📄 audio_pipeline.py    # STT/TTS processing
+│   ├── 📄 llm_engine.py        # LLM integration
+│   ├── 📄 tool_manager.py      # Tool execution
+│   └── 📂 plugins/             # Tool plugins
+│       ├── 📄 weather_tool.py
+│       ├── 📄 timer_tool.py
+│       ├── 📄 callback_tool.py
+│       └── 📄 ...
+├── 📂 tools/
+│   └── 📄 view-logs.py         # Log viewer utility
+├── 📂 grafana/
+│   └── 📂 dashboards/          # Grafana dashboards
+├── 📄 docker-compose.yml
+├── 📄 Dockerfile
+├── 📄 .env.example
+└── 📄 requirements.txt
 ```
 
-## Verifying Components
+---
 
-### Check SIP Registration
+## 📞 PBX Configuration
 
-```bash
-curl http://localhost:8080/health | jq .sip_registered
+### FreePBX / Asterisk
+
+1. Navigate to **Applications → Extensions**
+2. Click **Add Extension → Add New SIP Extension**
+3. Configure:
+   - **User Extension:** `1000` (or your choice)
+   - **Display Name:** `AI Assistant`
+   - **Secret:** Your secure password
+4. Click **Submit** and **Apply Config**
+
+![FreePBX extension setup](screenshots/freepbx-extension.png)
+<!-- TODO: Screenshot of FreePBX extension configuration -->
+
+**Update your `.env`:**
+
+```env
+SIP_USER=1000
+SIP_PASSWORD=your-extension-secret
+SIP_DOMAIN=192.168.1.100  # Your PBX IP
 ```
 
-### List Available Tools
+---
+
+### 3CX
+
+1. Go to **Users → Add**
+2. Select **Extension Type:** SIP
+3. Configure authentication credentials
+4. Note the extension number and password
+
+---
+
+## 🔍 Viewing Logs
+
+### Docker logs:
 
 ```bash
-curl http://localhost:8080/tools | jq
+docker logs -f sip-agent
 ```
 
-### Test a Tool
+**Example output:**
+
+```json
+{"ts": "2025-11-30 15:30:00", "level": "INFO", "event": "sip_registered", "msg": "SIP registration successful"}
+{"ts": "2025-11-30 15:30:05", "level": "INFO", "event": "call_start", "msg": "Incoming call", "data": {"caller": "1001"}}
+{"ts": "2025-11-30 15:30:06", "level": "INFO", "event": "stt_result", "msg": "What time is it"}
+{"ts": "2025-11-30 15:30:07", "level": "INFO", "event": "llm_response", "msg": "It's 3:30 PM..."}
+```
+
+### Formatted log viewer:
 
 ```bash
-curl -X POST http://localhost:8080/tools/DATETIME/execute \
+python tools/view-logs.py -f
+```
+
+**Example output:**
+
+```
+┌──────────────────────────────────────────────────────────────
+│ 📞 CALL #1 - From: 1001
+└──────────────────────────────────────────────────────────────
+15:30:05  📞 Call started
+15:30:06  👤 "What time is it?"
+15:30:07  🤖 "It's 3:30 PM on Saturday, November 30th."
+15:30:10  👤 "Set a timer for 5 minutes"
+15:30:11  🔧 [TOOL:SET_TIMER:duration=300]
+15:30:11  🤖 "Timer set for 5 minutes!"
+15:30:15  📴 Call ended (duration: 0:10)
+```
+
+![Log viewer](screenshots/log-viewer.png)
+<!-- TODO: Screenshot of view-logs.py output -->
+
+---
+
+## 🔧 Troubleshooting
+
+### ❌ SIP Not Registering
+
+```bash
+# Check SIP logs
+docker logs sip-agent 2>&1 | grep -i "sip\|register"
+```
+
+**Common causes:**
+- 🔐 Wrong credentials in `.env`
+- 🔥 Firewall blocking UDP 5060
+- 🌐 Wrong `SIP_DOMAIN`
+
+---
+
+### ❌ No Audio
+
+```bash
+# Test Speaches health
+curl http://localhost:8001/health
+```
+
+**Expected:**
+```json
+{"status": "ok"}
+```
+
+```bash
+# Test TTS
+curl -X POST http://localhost:8001/v1/audio/speech \
   -H "Content-Type: application/json" \
-  -d '{"params": {"format": "full"}}'
+  -d '{"input": "Hello world", "voice": "af_heart"}' \
+  --output test.wav
+
+# Play the audio
+aplay test.wav  # Linux
+afplay test.wav # macOS
 ```
 
-## Troubleshooting
+---
 
-### SIP Not Registering
-
-1. Check your PBX allows the IP address
-2. Verify credentials in `.env`
-3. Check firewall allows UDP 5060
+### ❌ LLM Not Responding
 
 ```bash
-# View SIP logs
-docker logs sip-agent 2>&1 | grep -i sip
+# Test LLM endpoint
+curl http://your-llm-server:8000/v1/models | jq
 ```
 
-### No Audio
+**Expected:**
+```json
+{
+  "data": [
+    {"id": "openai-community/gpt2-xl", "object": "model"}
+  ]
+}
+```
 
-1. Verify RTP port range is open (10000-10100/udp)
-2. Check TTS server is responding
-3. Verify STT server is processing audio
+---
 
-### LLM Not Responding
+## ➡️ Next Steps
 
-1. Test LLM endpoint directly:
-   ```bash
-   curl http://your-llm-server:8000/v1/models
-   ```
-2. Check `LLM_MODEL` matches available models
-
-## Next Steps
-
-- [Configuration Reference](configuration) - Full list of options
-- [API Documentation](api-reference) - REST API details
-- [Available Tools](tools) - Built-in capabilities
-- [Creating Plugins](plugins) - Add custom tools
+| Guide | Description |
+|-------|-------------|
+| [⚙️ Configuration](configuration) | All environment variables |
+| [🌐 API Reference](api-reference) | REST API documentation |
+| [🔧 Built-in Tools](tools) | Available capabilities |
+| [🔌 Creating Plugins](plugins) | Add custom tools |
+| [📖 Examples](examples) | Integration patterns |

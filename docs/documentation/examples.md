@@ -1,17 +1,21 @@
 ---
 title: "Examples"
 excerpt: "Common use cases and integration examples"
-category: "Guides"
-slug: "examples"
+category:
+  uri: guides
+slug: examples
 ---
 
-# Examples
+# 📖 Examples
 
 Real-world examples and integration patterns for the SIP AI Assistant.
 
+![Integrations overview](screenshots/integrations.png)
+<!-- TODO: Diagram showing integrations -->
+
 ---
 
-## Morning Weather Briefing
+## 🌅 Morning Weather Briefing
 
 Schedule a daily weather call at 7am:
 
@@ -26,12 +30,46 @@ curl -X POST http://sip-agent:8080/schedule \
     "recurring": "daily",
     "prefix": "Good morning! Here is your weather update for today.",
     "suffix": "Have a great day!"
-  }'
+  }' | jq
 ```
+
+**Response:**
+
+```json
+{
+  "schedule_id": "a1b2c3d4",
+  "status": "scheduled",
+  "extension": "5551234567",
+  "scheduled_for": "2025-12-01T07:00:00-08:00",
+  "delay_seconds": 28800,
+  "message": "Call scheduled for 2025-12-01T07:00:00-08:00",
+  "recurring": "daily"
+}
+```
+
+**What happens at 7am:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ ⏰ 07:00 AM - Scheduled call triggered                      │
+├─────────────────────────────────────────────────────────────┤
+│ 📞 Dialing 5551234567...                                   │
+│ 🔔 Ring... ring...                                         │
+│ 📱 Call answered                                            │
+│ 🔊 "Good morning! Here is your weather update for today."  │
+│ 🔊 "At Storm Lake, as of 7:00 am, it's 38 degrees..."     │
+│ 🔊 "Have a great day!"                                     │
+│ 📴 Call ended                                               │
+│ 🔄 Rescheduled for tomorrow at 07:00                       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+![Scheduled weather call](screenshots/scheduled-weather.png)
+<!-- TODO: Screenshot of log viewer showing scheduled call -->
 
 ---
 
-## Appointment Reminders
+## 📅 Appointment Reminders
 
 Send appointment reminders with confirmation:
 
@@ -45,45 +83,75 @@ curl -X POST http://sip-agent:8080/call \
     "choice": {
       "prompt": "Would you like to confirm or cancel this appointment?",
       "options": [
-        {"value": "confirmed", "synonyms": ["yes", "confirm", "keep", "sounds good"]},
-        {"value": "cancelled", "synonyms": ["no", "cancel", "reschedule"]}
+        {"value": "confirmed", "synonyms": ["yes", "yeah", "confirm", "keep"]},
+        {"value": "cancelled", "synonyms": ["no", "nope", "cancel", "reschedule"]}
       ],
       "timeout_seconds": 20,
       "repeat_count": 2
     }
-  }'
+  }' | jq
 ```
 
-Handle the webhook:
+**Webhook payload received:**
+
+```json
+{
+  "call_id": "out-1732945860-1",
+  "status": "completed",
+  "extension": "5551234567",
+  "duration_seconds": 45.2,
+  "message_played": true,
+  "choice_response": "confirmed",
+  "choice_raw_text": "yes that works for me",
+  "error": null
+}
+```
+
+**Handle the webhook (Python):**
 
 ```python
+from fastapi import FastAPI
+
+app = FastAPI()
+
 @app.post("/webhook/appointment")
 async def handle_appointment_webhook(payload: dict):
     call_id = payload["call_id"]
     choice = payload.get("choice_response")
     
     if choice == "confirmed":
-        # Mark appointment confirmed in your system
+        # ✅ Mark appointment confirmed
         await confirm_appointment(call_id)
+        print(f"📅 Appointment confirmed: {call_id}")
+        
     elif choice == "cancelled":
-        # Open slot for rebooking
+        # ❌ Open slot for rebooking
         await cancel_appointment(call_id)
+        print(f"📅 Appointment cancelled: {call_id}")
+        
     else:
-        # No response or unclear - follow up later
+        # ⚠️ No response - follow up later
         await schedule_followup(call_id)
+        print(f"📅 No response, scheduling followup: {call_id}")
+    
+    return {"status": "ok"}
 ```
 
 ---
 
-## Home Assistant Integration
+## 🏠 Home Assistant Integration
 
 Trigger a weather call when leaving home:
 
-**Home Assistant automation.yaml:**
+![Home Assistant automation](screenshots/home-assistant-automation.png)
+<!-- TODO: Screenshot of Home Assistant automation UI -->
+
+### `automations.yaml`
 
 ```yaml
 automation:
-  - alias: "Weather announcement when leaving"
+  - id: weather_announcement_leaving
+    alias: "🌤️ Weather announcement when leaving"
     trigger:
       - platform: state
         entity_id: person.john
@@ -97,7 +165,7 @@ automation:
       - service: rest_command.weather_call
 ```
 
-**Home Assistant configuration.yaml:**
+### `configuration.yaml`
 
 ```yaml
 rest_command:
@@ -107,20 +175,35 @@ rest_command:
     content_type: "application/json"
     payload: >
       {
-        "tool": "WEATHER",
         "extension": "5551234567",
         "prefix": "Good morning! Before you head out, here's the weather."
       }
 ```
 
+**What happens:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ 🏠 Home Assistant Event                                     │
+├─────────────────────────────────────────────────────────────┤
+│ 📍 John left home at 7:30 AM                               │
+│ 🔄 Trigger: person.john state changed to "not_home"        │
+│ ✅ Condition: Time is between 6:00 AM and 10:00 AM         │
+│ ⚡ Action: Call rest_command.weather_call                   │
+│ 📞 SIP Agent receives webhook                               │
+│ 🌤️ Weather tool executed                                   │
+│ 📞 Outbound call to 5551234567                             │
+│ 🔊 "Good morning! Before you head out..."                  │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ---
 
-## Monitoring Alerts
+## 🚨 Monitoring Alerts
 
 Alert on-call engineer when system goes down:
 
 ```bash
-# In your monitoring script or alertmanager webhook
 curl -X POST http://sip-agent:8080/call \
   -H "Content-Type: application/json" \
   -d '{
@@ -134,19 +217,22 @@ curl -X POST http://sip-agent:8080/call \
       ],
       "timeout_seconds": 30
     }
-  }'
+  }' | jq
 ```
 
-**Alertmanager webhook receiver:**
+### Alertmanager Integration
+
+**`alertmanager.yml`:**
 
 ```yaml
 receivers:
   - name: 'phone-alert'
     webhook_configs:
       - url: 'http://alert-bridge:8000/alert'
+        send_resolved: true
 ```
 
-**Alert bridge service:**
+**Alert bridge service (Python):**
 
 ```python
 from fastapi import FastAPI
@@ -154,78 +240,164 @@ import httpx
 
 app = FastAPI()
 
+# 📞 On-call rotation
+ONCALL_NUMBERS = {
+    "primary": "5551234567",
+    "secondary": "5559876543"
+}
+
 @app.post("/alert")
 async def handle_alert(alert: dict):
-    message = f"Alert: {alert['labels']['alertname']}. "
-    message += f"{alert['annotations'].get('description', '')}"
+    # 📋 Build alert message
+    alert_name = alert['labels']['alertname']
+    severity = alert['labels'].get('severity', 'warning')
+    description = alert['annotations'].get('description', 'No description')
     
+    message = f"Alert: {alert_name}. Severity: {severity}. {description}"
+    
+    # 📞 Call on-call engineer
     async with httpx.AsyncClient() as client:
-        await client.post(
+        response = await client.post(
             "http://sip-agent:8080/call",
             json={
-                "extension": get_oncall_number(),
+                "extension": ONCALL_NUMBERS["primary"],
                 "message": message,
-                "callback_url": "http://alert-bridge:8000/ack"
+                "callback_url": "http://alert-bridge:8000/ack",
+                "choice": {
+                    "prompt": "Say acknowledge to confirm.",
+                    "options": [{"value": "ack", "synonyms": ["acknowledge", "ack", "got it"]}],
+                    "timeout_seconds": 30
+                }
             }
         )
+    
+    return {"status": "calling", "call_id": response.json()["call_id"]}
+
+@app.post("/ack")
+async def handle_ack(payload: dict):
+    if payload.get("choice_response") == "ack":
+        print(f"✅ Alert acknowledged by on-call")
+        # Update incident management system
+    else:
+        print(f"⚠️ No acknowledgment, escalating to secondary")
+        # Call secondary on-call
 ```
 
 ---
 
-## Medication Reminders
+## 💊 Medication Reminders
 
-Recurring medication reminders:
+Set up recurring medication reminders:
 
 ```bash
-# Morning medication
+# 🌅 Morning medication (8 AM)
 curl -X POST http://sip-agent:8080/schedule \
   -H "Content-Type: application/json" \
   -d '{
     "extension": "5551234567",
     "message": "Good morning! This is your reminder to take your morning medication.",
     "at_time": "08:00",
+    "timezone": "America/New_York",
     "recurring": "daily"
-  }'
+  }' | jq
 
-# Evening medication
+# 🌙 Evening medication (8 PM)
 curl -X POST http://sip-agent:8080/schedule \
   -H "Content-Type: application/json" \
   -d '{
     "extension": "5551234567",
     "message": "Good evening! This is your reminder to take your evening medication.",
     "at_time": "20:00",
+    "timezone": "America/New_York",
     "recurring": "daily"
-  }'
+  }' | jq
 ```
 
----
-
-## Cron-based Weather Calls
-
-Use cron for flexible scheduling:
+**List scheduled reminders:**
 
 ```bash
-# /etc/cron.d/weather-calls
+curl http://sip-agent:8080/schedule | jq
+```
 
-# Weekday mornings at 6:30am
-30 6 * * 1-5 root curl -X POST http://sip-agent:8080/tools/WEATHER/call -H "Content-Type: application/json" -d '{"tool":"WEATHER","extension":"1001","prefix":"Good morning! Time to wake up."}' > /dev/null 2>&1
+**Output:**
 
-# Weekend mornings at 8am
-0 8 * * 0,6 root curl -X POST http://sip-agent:8080/tools/WEATHER/call -H "Content-Type: application/json" -d '{"tool":"WEATHER","extension":"1001","prefix":"Good morning!"}' > /dev/null 2>&1
+```json
+[
+  {
+    "schedule_id": "med-morning",
+    "extension": "5551234567",
+    "scheduled_for": "2025-12-01T08:00:00-05:00",
+    "remaining_seconds": 14400,
+    "message": "Good morning! This is your reminder...",
+    "tool": null,
+    "recurring": "daily",
+    "status": "pending"
+  },
+  {
+    "schedule_id": "med-evening",
+    "extension": "5551234567",
+    "scheduled_for": "2025-12-01T20:00:00-05:00",
+    "remaining_seconds": 57600,
+    "message": "Good evening! This is your reminder...",
+    "tool": null,
+    "recurring": "daily",
+    "status": "pending"
+  }
+]
 ```
 
 ---
 
-## n8n Workflow Integration
+## ⏰ Cron-based Scheduling
+
+Use system cron for flexible scheduling:
+
+**`/etc/cron.d/weather-calls`:**
+
+```bash
+# ┌───────────── minute (0-59)
+# │ ┌───────────── hour (0-23)
+# │ │ ┌───────────── day of month (1-31)
+# │ │ │ ┌───────────── month (1-12)
+# │ │ │ │ ┌───────────── day of week (0-6, Sun=0)
+# │ │ │ │ │
+# │ │ │ │ │
+
+# 🌅 Weekday mornings at 6:30am
+30 6 * * 1-5 root curl -s -X POST http://sip-agent:8080/tools/WEATHER/call \
+  -H "Content-Type: application/json" \
+  -d '{"extension":"1001","prefix":"Good morning! Time to wake up."}' > /dev/null
+
+# 🌅 Weekend mornings at 8am
+0 8 * * 0,6 root curl -s -X POST http://sip-agent:8080/tools/WEATHER/call \
+  -H "Content-Type: application/json" \
+  -d '{"extension":"1001","prefix":"Good morning!"}' > /dev/null
+
+# 🌙 Nightly summary at 9pm
+0 21 * * * root curl -s -X POST http://sip-agent:8080/tools/WEATHER/call \
+  -H "Content-Type: application/json" \
+  -d '{"extension":"1001","prefix":"Here is your evening weather."}' > /dev/null
+```
+
+---
+
+## 🔄 n8n Workflow Integration
 
 Create a workflow that calls when a form is submitted:
 
+![n8n workflow](screenshots/n8n-workflow.png)
+<!-- TODO: Screenshot of n8n workflow -->
+
+**Workflow JSON:**
+
 ```json
 {
+  "name": "Contact Form → Phone Call",
   "nodes": [
     {
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
+      "position": [250, 300],
       "parameters": {
         "path": "contact-form",
         "httpMethod": "POST"
@@ -234,29 +406,48 @@ Create a workflow that calls when a form is submitted:
     {
       "name": "HTTP Request",
       "type": "n8n-nodes-base.httpRequest",
+      "position": [450, 300],
       "parameters": {
         "method": "POST",
         "url": "http://sip-agent:8080/call",
         "jsonParameters": true,
-        "bodyParameters": {
-          "message": "You have a new contact form submission from {{ $json.name }}. They said: {{ $json.message }}",
-          "extension": "1001"
-        }
+        "options": {},
+        "bodyParametersJson": "={ \"message\": \"You have a new contact form submission from {{ $json.name }}. They said: {{ $json.message }}\", \"extension\": \"1001\" }"
       }
     }
-  ]
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "HTTP Request", "type": "main", "index": 0}]]
+    }
+  }
 }
+```
+
+**Trigger the workflow:**
+
+```bash
+curl -X POST http://n8n:5678/webhook/contact-form \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John Smith",
+    "email": "john@example.com",
+    "message": "I am interested in your services"
+  }'
 ```
 
 ---
 
-## Python Integration
+## 🐍 Python SDK
 
 ```python
 import httpx
 from typing import Optional
 
+
 class SIPAssistant:
+    """Python client for the SIP AI Assistant API."""
+    
     def __init__(self, base_url: str = "http://sip-agent:8080"):
         self.base_url = base_url
     
@@ -266,7 +457,7 @@ class SIPAssistant:
         message: str,
         callback_url: Optional[str] = None
     ) -> dict:
-        """Make an outbound call."""
+        """📞 Make an outbound call."""
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 f"{self.base_url}/call",
@@ -283,12 +474,11 @@ class SIPAssistant:
         extension: str,
         prefix: Optional[str] = None
     ) -> dict:
-        """Call with weather update."""
+        """🌤️ Call with weather update."""
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 f"{self.base_url}/tools/WEATHER/call",
                 json={
-                    "tool": "WEATHER",
                     "extension": extension,
                     "prefix": prefix
                 }
@@ -301,7 +491,7 @@ class SIPAssistant:
         time: str,
         timezone: str = "America/Los_Angeles"
     ) -> dict:
-        """Schedule daily weather calls."""
+        """⏰ Schedule daily weather calls."""
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 f"{self.base_url}/schedule",
@@ -317,88 +507,53 @@ class SIPAssistant:
             return response.json()
     
     async def get_weather(self) -> dict:
-        """Get weather data without calling."""
+        """🌡️ Get weather data without calling."""
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 f"{self.base_url}/tools/WEATHER/execute",
-                json={"tool": "WEATHER"}
+                json={}
             )
             return response.json()
 
-# Usage
+
+# 📖 Usage example
 async def main():
     assistant = SIPAssistant()
     
-    # Get weather data
+    # 🌤️ Get weather
     weather = await assistant.get_weather()
     print(f"Weather: {weather['message']}")
     
-    # Schedule daily briefing
+    # ⏰ Schedule daily briefing
     result = await assistant.schedule_daily_weather(
         extension="5551234567",
         time="07:00"
     )
     print(f"Scheduled: {result['schedule_id']}")
+    
+    # 📞 Make a call
+    call = await assistant.call(
+        extension="5551234567",
+        message="Hello! This is a test call."
+    )
+    print(f"Call ID: {call['call_id']}")
+
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())
 ```
 
 ---
 
-## Node.js Integration
-
-```javascript
-const axios = require('axios');
-
-class SIPAssistant {
-  constructor(baseUrl = 'http://sip-agent:8080') {
-    this.baseUrl = baseUrl;
-  }
-
-  async call(extension, message, callbackUrl = null) {
-    const response = await axios.post(`${this.baseUrl}/call`, {
-      extension,
-      message,
-      callback_url: callbackUrl
-    });
-    return response.data;
-  }
-
-  async weatherCall(extension, prefix = null) {
-    const response = await axios.post(`${this.baseUrl}/tools/WEATHER/call`, {
-      tool: 'WEATHER',
-      extension,
-      prefix
-    });
-    return response.data;
-  }
-
-  async scheduleDailyWeather(extension, time, timezone = 'America/Los_Angeles') {
-    const response = await axios.post(`${this.baseUrl}/schedule`, {
-      extension,
-      tool: 'WEATHER',
-      at_time: time,
-      timezone,
-      recurring: 'daily',
-      prefix: 'Good morning! Here is your weather.'
-    });
-    return response.data;
-  }
-}
-
-// Usage
-const assistant = new SIPAssistant();
-
-// Schedule morning weather
-assistant.scheduleDailyWeather('5551234567', '07:00')
-  .then(result => console.log('Scheduled:', result.schedule_id));
-```
-
----
-
-## Grafana Alert Integration
+## 📊 Grafana Alert Integration
 
 Configure Grafana to call via webhook:
 
-**Contact Point:**
+![Grafana alerting](screenshots/grafana-alerting.png)
+<!-- TODO: Screenshot of Grafana contact point configuration -->
+
+**Contact Point (YAML):**
 
 ```yaml
 apiVersion: 1
@@ -427,7 +582,7 @@ Status: {{ .Status }}
 
 ---
 
-## Docker Health Check
+## 🐳 Docker Health Check
 
 Monitor the assistant and restart if unhealthy:
 
@@ -442,4 +597,16 @@ services:
       retries: 3
       start_period: 10s
     restart: unless-stopped
+```
+
+**Check health manually:**
+
+```bash
+docker inspect --format='{{.State.Health.Status}}' sip-agent
+```
+
+**Expected output:**
+
+```
+healthy
 ```

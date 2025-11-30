@@ -1,35 +1,68 @@
 ---
 title: "Creating Plugins"
 excerpt: "Build custom tools for the voice assistant"
-category: "Development"
-slug: "plugins"
+category:
+  uri: development
+slug: plugins
 ---
 
-# Creating Plugins
+# 🔌 Creating Plugins
 
-Extend the SIP AI Assistant with custom tools by creating Python plugins. This guide covers everything you need to build your own tools.
+Extend the SIP AI Assistant with custom tools by creating Python plugins.
 
-## Plugin Basics
+![Plugin code](screenshots/plugin-code.png)
+<!-- TODO: Screenshot of VS Code with a plugin file open -->
 
-Plugins are Python files in the `src/plugins/` directory that define tool classes. Each tool:
+---
 
-1. Inherits from `BaseTool`
-2. Defines a name, description, and parameters
-3. Implements an `execute()` method
+## 🎯 Plugin Basics
 
-## Minimal Example
+Plugins are Python files in `src/plugins/` that define tool classes:
+
+```
+src/plugins/
+├── __init__.py
+├── weather_tool.py
+├── timer_tool.py
+├── callback_tool.py
+└── my_custom_tool.py   # 👈 Your plugin here!
+```
+
+Each plugin:
+1. 📦 Inherits from `BaseTool`
+2. 📝 Defines name, description, and parameters
+3. ⚡ Implements an `execute()` method
+
+---
+
+## 🚀 Quick Start
+
+### Step 1: Create the Plugin File
 
 Create `src/plugins/hello_tool.py`:
 
 ```python
+"""
+Hello Tool
+==========
+A simple greeting tool.
+"""
+
 from typing import Any, Dict
 from tool_plugins import BaseTool, ToolResult, ToolStatus
 
+
 class HelloTool(BaseTool):
+    # 🏷️ Unique tool name (UPPERCASE)
     name = "HELLO"
+    
+    # 📝 Description shown to LLM
     description = "Say hello to someone"
+    
+    # ✅ Enable/disable
     enabled = True
     
+    # 📋 Parameter definitions
     parameters = {
         "name": {
             "type": "string",
@@ -40,59 +73,121 @@ class HelloTool(BaseTool):
     
     async def execute(self, params: Dict[str, Any]) -> ToolResult:
         name = params.get("name", "friend")
+        
         return ToolResult(
             status=ToolStatus.SUCCESS,
             message=f"Hello, {name}! Nice to meet you."
         )
 ```
 
-After adding the file, register it in `tool_manager.py`:
+### Step 2: Register the Plugin
+
+Edit `src/tool_manager.py`:
 
 ```python
-from plugins.hello_tool import HelloTool
-
-# In _load_tools():
-tool_classes = [
-    # ... existing tools ...
-    HelloTool,
-]
+def _load_tools(self):
+    """Load all tool plugins."""
+    # Add import at top of method
+    from plugins.hello_tool import HelloTool
+    
+    tool_classes = [
+        # ... existing tools ...
+        HelloTool,  # 👈 Add your tool here
+    ]
 ```
 
-Restart the service and your tool is available!
+### Step 3: Restart and Test
 
-## Tool Class Structure
+```bash
+# Restart the service
+docker compose restart sip-agent
+
+# Verify tool is loaded
+curl http://localhost:8080/tools | jq '.[].name'
+```
+
+**Expected output:**
+
+```
+"WEATHER"
+"SET_TIMER"
+"CALLBACK"
+...
+"HELLO"    # 👈 Your new tool!
+```
+
+### Step 4: Test Execution
+
+```bash
+curl -X POST http://localhost:8080/tools/HELLO/execute \
+  -H "Content-Type: application/json" \
+  -d '{"params": {"name": "World"}}' | jq
+```
+
+**Expected output:**
+
+```json
+{
+  "success": true,
+  "tool": "HELLO",
+  "message": "Hello, World! Nice to meet you.",
+  "data": null,
+  "spoken": false,
+  "error": null
+}
+```
+
+![Plugin test](screenshots/plugin-test.png)
+<!-- TODO: Screenshot of terminal showing plugin test -->
+
+---
+
+## 📋 Tool Class Structure
 
 ```python
 from typing import Any, Dict
 from tool_plugins import BaseTool, ToolResult, ToolStatus
 
+
 class MyTool(BaseTool):
-    # Required: Unique tool name (uppercase)
+    # ═══════════════════════════════════════════════════════════
+    # 🏷️ REQUIRED: Unique tool name (UPPERCASE)
+    # ═══════════════════════════════════════════════════════════
     name = "MY_TOOL"
     
-    # Required: Description shown to LLM
+    # ═══════════════════════════════════════════════════════════
+    # 📝 REQUIRED: Description (shown to LLM)
+    # ═══════════════════════════════════════════════════════════
     description = "What this tool does"
     
-    # Optional: Enable/disable (default: True)
+    # ═══════════════════════════════════════════════════════════
+    # ✅ OPTIONAL: Enable/disable (default: True)
+    # ═══════════════════════════════════════════════════════════
     enabled = True
     
-    # Optional: Parameter definitions
+    # ═══════════════════════════════════════════════════════════
+    # 📋 OPTIONAL: Parameter definitions
+    # ═══════════════════════════════════════════════════════════
     parameters = {
         "param_name": {
             "type": "string",      # string, integer, number, boolean
-            "description": "...",   # Help text
+            "description": "...",   # Help text for LLM
             "required": True,       # Required or optional
             "default": "value"      # Default if not provided
         }
     }
     
-    # Optional: Custom initialization
+    # ═══════════════════════════════════════════════════════════
+    # 🔧 OPTIONAL: Custom initialization
+    # ═══════════════════════════════════════════════════════════
     def __init__(self, assistant):
         super().__init__(assistant)
         # Access config: self.config
         # Access assistant: self.assistant
     
-    # Required: Execute the tool
+    # ═══════════════════════════════════════════════════════════
+    # ⚡ REQUIRED: Execute the tool
+    # ═══════════════════════════════════════════════════════════
     async def execute(self, params: Dict[str, Any]) -> ToolResult:
         # Your tool logic here
         return ToolResult(
@@ -102,38 +197,42 @@ class MyTool(BaseTool):
         )
 ```
 
-## Parameter Types
+---
+
+## 📊 Parameter Types
 
 | Type | Python Type | Example Value |
 |------|-------------|---------------|
-| `string` | str | "hello" |
-| `integer` | int | 42 |
-| `number` | float | 3.14 |
-| `boolean` | bool | true/false |
+| `string` | `str` | `"hello"` |
+| `integer` | `int` | `42` |
+| `number` | `float` | `3.14` |
+| `boolean` | `bool` | `true` / `false` |
 
-Parameters are automatically validated and converted to the correct type.
+Parameters are automatically validated and converted.
 
-## Return Values
+---
+
+## 📤 Return Values
 
 Always return a `ToolResult`:
 
 ```python
 from tool_plugins import ToolResult, ToolStatus
 
-# Success
+# ✅ Success
 return ToolResult(
     status=ToolStatus.SUCCESS,
     message="Message to speak to user",
     data={"key": "value"}  # Optional structured data
 )
 
-# Failure
+# ❌ Failure
 return ToolResult(
     status=ToolStatus.FAILED,
     message="Error message to speak"
 )
 
-# Pending (for async operations)
+# ⏳ Pending (for async operations)
 return ToolResult(
     status=ToolStatus.PENDING,
     message="Working on it...",
@@ -141,34 +240,49 @@ return ToolResult(
 )
 ```
 
-## Accessing Resources
+---
+
+## 🔗 Accessing Resources
 
 Your tool has access to:
 
 ```python
 class MyTool(BaseTool):
     async def execute(self, params):
-        # Configuration
+        # ═══════════════════════════════════════════════════════
+        # 📋 Configuration
+        # ═══════════════════════════════════════════════════════
         api_key = self.config.my_api_key
+        base_url = self.config.my_base_url
         
-        # Current call info
+        # ═══════════════════════════════════════════════════════
+        # 📞 Current call info
+        # ═══════════════════════════════════════════════════════
         if self.assistant.current_call:
             caller_id = self.assistant.current_call.caller
+            call_duration = self.assistant.current_call.duration
         
-        # Schedule tasks
+        # ═══════════════════════════════════════════════════════
+        # ⏰ Schedule tasks
+        # ═══════════════════════════════════════════════════════
         task_id = await self.assistant.tool_manager.schedule_task(
             task_type="my_task",
             delay_seconds=60,
             message="Task complete"
         )
         
-        # Make HTTP requests
+        # ═══════════════════════════════════════════════════════
+        # 🌐 HTTP requests
+        # ═══════════════════════════════════════════════════════
         import httpx
         async with httpx.AsyncClient() as client:
             response = await client.get("https://api.example.com")
+            data = response.json()
 ```
 
-## Full Example: Stock Price Tool
+---
+
+## 📖 Full Example: Stock Price Tool
 
 ```python
 """
@@ -201,15 +315,16 @@ class StockPriceTool(BaseTool):
     
     def __init__(self, assistant):
         super().__init__(assistant)
-        # Check for required config
+        # 🔧 Check for required config
         self.api_key = getattr(self.config, 'stock_api_key', None)
         if not self.api_key:
             self.enabled = False
-            logger.info("Stock tool disabled - no API key configured")
+            logger.info("📉 Stock tool disabled - no API key configured")
     
     async def execute(self, params: Dict[str, Any]) -> ToolResult:
         symbol = params.get("symbol", "").upper()
         
+        # ✅ Validate input
         if not symbol:
             return ToolResult(
                 status=ToolStatus.FAILED,
@@ -217,7 +332,7 @@ class StockPriceTool(BaseTool):
             )
         
         try:
-            # Fetch stock data
+            # 🌐 Fetch stock data
             async with httpx.AsyncClient(timeout=10.0) as client:
                 response = await client.get(
                     f"https://api.stockprovider.com/quote/{symbol}",
@@ -233,7 +348,7 @@ class StockPriceTool(BaseTool):
                 response.raise_for_status()
                 data = response.json()
             
-            # Format result
+            # 📊 Format result
             price = data.get("price", 0)
             change = data.get("change", 0)
             change_pct = data.get("change_percent", 0)
@@ -242,7 +357,7 @@ class StockPriceTool(BaseTool):
             
             return ToolResult(
                 status=ToolStatus.SUCCESS,
-                message=f"{symbol} is trading at ${price:.2f}, {direction} {abs(change_pct):.1f}% today",
+                message=f"{symbol} is at ${price:.2f}, {direction} {abs(change_pct):.1f}% today",
                 data={
                     "symbol": symbol,
                     "price": price,
@@ -264,7 +379,9 @@ class StockPriceTool(BaseTool):
             )
 ```
 
-## Full Example: Home Assistant Integration
+---
+
+## 🏠 Full Example: Home Assistant Integration
 
 ```python
 """
@@ -300,6 +417,15 @@ class HomeAssistantTool(BaseTool):
         }
     }
     
+    # 📋 Device name mappings
+    DEVICE_MAP = {
+        "living room light": "light.living_room",
+        "bedroom light": "light.bedroom",
+        "kitchen light": "light.kitchen",
+        "front door": "lock.front_door",
+        "garage": "cover.garage_door",
+    }
+    
     def __init__(self, assistant):
         super().__init__(assistant)
         self.ha_url = getattr(self.config, 'home_assistant_url', None)
@@ -307,44 +433,42 @@ class HomeAssistantTool(BaseTool):
         
         if not self.ha_url or not self.ha_token:
             self.enabled = False
-            logger.info("Home Assistant tool disabled - not configured")
+            logger.info("🏠 Home Assistant tool disabled - not configured")
     
     async def execute(self, params: Dict[str, Any]) -> ToolResult:
         action = params.get("action", "").lower()
         device = params.get("device", "")
         
-        # Map friendly names to entity IDs
-        entity_id = self._resolve_device(device)
-        if not entity_id:
-            return ToolResult(
-                status=ToolStatus.FAILED,
-                message=f"Device '{device}' not found"
-            )
+        # 🔍 Resolve device name to entity ID
+        entity_id = self.DEVICE_MAP.get(device.lower(), device)
+        
+        headers = {
+            "Authorization": f"Bearer {self.ha_token}",
+            "Content-Type": "application/json"
+        }
         
         try:
-            headers = {
-                "Authorization": f"Bearer {self.ha_token}",
-                "Content-Type": "application/json"
-            }
-            
             async with httpx.AsyncClient(timeout=10.0) as client:
                 if action == "status":
-                    # Get current state
+                    # 📊 Get current state
                     response = await client.get(
                         f"{self.ha_url}/api/states/{entity_id}",
                         headers=headers
                     )
                     data = response.json()
                     state = data.get("state", "unknown")
+                    
                     return ToolResult(
                         status=ToolStatus.SUCCESS,
                         message=f"The {device} is currently {state}"
                     )
                 else:
-                    # Perform action
-                    service = self._get_service(action, entity_id)
+                    # ⚡ Perform action
+                    domain = entity_id.split(".")[0]
+                    service = f"turn_{action}" if action != "toggle" else "toggle"
+                    
                     response = await client.post(
-                        f"{self.ha_url}/api/services/{service}",
+                        f"{self.ha_url}/api/services/{domain}/{service}",
                         headers=headers,
                         json={"entity_id": entity_id}
                     )
@@ -366,33 +490,13 @@ class HomeAssistantTool(BaseTool):
                 status=ToolStatus.FAILED,
                 message="Error communicating with Home Assistant"
             )
-    
-    def _resolve_device(self, device: str) -> str:
-        """Map friendly names to entity IDs."""
-        device_map = {
-            "living room light": "light.living_room",
-            "bedroom light": "light.bedroom",
-            "kitchen light": "light.kitchen",
-            "front door": "lock.front_door",
-            "garage": "cover.garage_door",
-        }
-        return device_map.get(device.lower(), device)
-    
-    def _get_service(self, action: str, entity_id: str) -> str:
-        """Get the appropriate service for the action."""
-        domain = entity_id.split(".")[0]
-        
-        if action in ("on", "off", "toggle"):
-            return f"{domain}/turn_{action}" if action != "toggle" else f"{domain}/toggle"
-        
-        return f"{domain}/{action}"
 ```
 
-## Best Practices
+---
 
-### 1. Handle Errors Gracefully
+## ✅ Best Practices
 
-Always catch exceptions and return user-friendly messages:
+### 1. 🛡️ Handle Errors Gracefully
 
 ```python
 try:
@@ -401,86 +505,99 @@ except Exception as e:
     logger.error(f"Error: {e}")
     return ToolResult(
         status=ToolStatus.FAILED,
-        message="I couldn't complete that request"
+        message="I couldn't complete that request"  # 👈 User-friendly!
     )
 ```
 
-### 2. Validate Input
-
-Check parameters before using them:
+### 2. ✔️ Validate Input
 
 ```python
 async def execute(self, params):
     value = params.get("value")
-    if not value or len(value) > 100:
+    
+    if not value:
         return ToolResult(
             status=ToolStatus.FAILED,
-            message="Please provide a valid value"
+            message="Please provide a value"
+        )
+    
+    if len(value) > 100:
+        return ToolResult(
+            status=ToolStatus.FAILED,
+            message="Value is too long"
         )
 ```
 
-### 3. Use Logging
-
-Log important events for debugging:
+### 3. 📝 Use Logging
 
 ```python
 from logging_utils import log_event
 
 log_event(logger, logging.INFO, "Tool executed",
-         event="my_tool_success", data={"key": "value"})
+         event="my_tool_success", 
+         data={"key": "value"})
 ```
 
-### 4. Keep Messages Conversational
-
-Messages are spoken aloud - keep them natural:
+### 4. 🗣️ Keep Messages Conversational
 
 ```python
-# Good
-message="The temperature is 72 degrees"
+# ✅ Good - natural speech
+message = "The temperature is 72 degrees"
 
-# Bad  
-message="Temperature: 72°F | Humidity: 45%"
+# ❌ Bad - robotic
+message = "Temperature: 72°F | Humidity: 45%"
 ```
 
-### 5. Disable When Unconfigured
-
-Check for required config and disable if missing:
+### 5. 🔧 Disable When Unconfigured
 
 ```python
 def __init__(self, assistant):
     super().__init__(assistant)
     if not self.config.required_setting:
         self.enabled = False
+        logger.info("Tool disabled - missing config")
 ```
 
-## Testing Your Plugin
+---
 
-Test via the API:
-
-```bash
-# List tools (should include yours)
-curl http://localhost:8080/tools
-
-# Execute your tool
-curl -X POST http://localhost:8080/tools/MY_TOOL/execute \
-  -H "Content-Type: application/json" \
-  -d '{"params": {"param1": "value1"}}'
-```
-
-## Plugin Directory Structure
+## 📁 Plugin Directory Structure
 
 ```
 src/plugins/
-├── __init__.py
-├── README.md
-├── timer_tool.py
-├── callback_tool.py
-├── weather_tool.py
-├── hangup_tool.py
-├── status_tool.py
-├── cancel_tool.py
-├── datetime_tool.py
-├── calc_tool.py
-├── joke_tool.py
-└── my_custom_tool.py   # Your plugins here!
+├── 📄 __init__.py          # Package marker
+├── 📄 README.md            # Plugin documentation
+├── 📄 timer_tool.py        # ⏲️ SET_TIMER
+├── 📄 callback_tool.py     # 📞 CALLBACK
+├── 📄 weather_tool.py      # 🌤️ WEATHER
+├── 📄 hangup_tool.py       # 📴 HANGUP
+├── 📄 status_tool.py       # 📋 STATUS
+├── 📄 cancel_tool.py       # ❌ CANCEL
+├── 📄 datetime_tool.py     # 🕐 DATETIME
+├── 📄 calc_tool.py         # 🧮 CALC
+├── 📄 joke_tool.py         # 😄 JOKE
+└── 📄 my_custom_tool.py    # 🔌 Your plugins!
+```
+
+---
+
+## 🧪 Testing Checklist
+
+```bash
+# 1. ✅ Tool appears in list
+curl http://localhost:8080/tools | jq '.[].name' | grep MY_TOOL
+
+# 2. ✅ Tool info is correct
+curl http://localhost:8080/tools/MY_TOOL | jq
+
+# 3. ✅ Execution works
+curl -X POST http://localhost:8080/tools/MY_TOOL/execute \
+  -H "Content-Type: application/json" \
+  -d '{"params": {"param1": "value1"}}' | jq
+
+# 4. ✅ Error handling works
+curl -X POST http://localhost:8080/tools/MY_TOOL/execute \
+  -H "Content-Type: application/json" \
+  -d '{"params": {}}' | jq  # Missing required param
+
+# 5. ✅ Voice test - make a call and try it!
 ```
