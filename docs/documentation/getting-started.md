@@ -1,18 +1,19 @@
 ---
-title: "Getting Started"
-excerpt: "Install and configure the SIP AI Assistant"
+title: Getting Started
+excerpt: >-
+  Install and configure the SIP AI Assistant with step-by-step setup
+  instructions
 category:
   uri: setup
+link:
+  new_tab: false
 slug: getting-started
 ---
-
 > 🤖 **ROBO CODED** — This documentation was made with AI and may not be 100% sane. But the code does work! 🎉
 
 # 🚀 Getting Started
 
 This guide walks you through setting up the SIP AI Assistant.
-
----
 
 ## 📋 Prerequisites
 
@@ -25,11 +26,9 @@ Before you begin, ensure you have:
 | 🧠 **LLM Server** | OpenAI API, vLLM, Ollama, or LM Studio |
 | 🎤 **Speaches** | [Speaches](https://github.com/speaches-ai/speaches) for STT/TTS |
 
----
-
 ## ⚡ Quick Start
 
-### Step 1: Clone the Repository
+<Accordion title="Step 1: Clone the Repository" icon="download">
 
 ```bash
 git clone https://github.com/your-org/sip-agent.git
@@ -46,9 +45,9 @@ remote: Compressing objects: 100% (567/567), done.
 Receiving objects: 100% (1234/1234), 2.5 MiB | 10.00 MiB/s, done.
 ```
 
----
+</Accordion>
 
-### Step 2: Configure Environment
+<Accordion title="Step 2: Configure Environment" icon="cog">
 
 ```bash
 cp .env.example .env
@@ -84,9 +83,9 @@ LLM_MODEL=openai-community/gpt2-xl
 
 > 💡 **Tip:** See [Configuration Reference](configuration) for all available options and full model recommendations.
 
----
+</Accordion>
 
-### Step 3: Start the Services
+<Accordion title="Step 3: Start the Services" icon="play">
 
 ```bash
 docker compose up -d
@@ -101,11 +100,12 @@ docker compose up -d
  ✔ Container sip-agent            Started
 ```
 
----
+</Accordion>
 
-### Step 4: Verify Installation
+<Accordion title="Step 4: Verify Installation" icon="check">
 
-#### Check health endpoint:
+<Tabs>
+<Tab title="Health Check">
 
 ```bash
 curl http://localhost:8080/health | jq
@@ -121,10 +121,9 @@ curl http://localhost:8080/health | jq
 }
 ```
 
-![Health check response](screenshots/health-check.png)
-<!-- TODO: Screenshot of terminal with health check output -->
+</Tab>
 
-#### Check SIP registration:
+<Tab title="SIP Registration">
 
 ```bash
 curl http://localhost:8080/health | jq '.sip_registered'
@@ -136,7 +135,9 @@ curl http://localhost:8080/health | jq '.sip_registered'
 true
 ```
 
-#### List available tools:
+</Tab>
+
+<Tab title="Available Tools">
 
 ```bash
 curl http://localhost:8080/tools | jq '.[].name'
@@ -157,20 +158,17 @@ curl http://localhost:8080/tools | jq '.[].name'
 "SIMON_SAYS"
 ```
 
-![Tools list](screenshots/tools-list.png)
-<!-- TODO: Screenshot of tools list output -->
+</Tab>
+</Tabs>
 
----
+</Accordion>
 
-### Step 5: Make a Test Call 📞
+<Accordion title="Step 5: Make a Test Call 📞" icon="phone">
 
 1. Open your SIP phone or softphone
 2. Dial the extension assigned to the assistant
 3. Wait for the greeting
 4. Say *"Hello!"* or *"What time is it?"*
-
-![Test call](screenshots/test-call.png)
-<!-- TODO: Screenshot of softphone making a call -->
 
 **Example conversation:**
 
@@ -188,7 +186,7 @@ curl http://localhost:8080/tools | jq '.[].name'
 └────────────────────────────────────────────────────────────┘
 ```
 
----
+</Accordion>
 
 ## 🐳 Docker Compose Configuration
 
@@ -237,8 +235,6 @@ services:
 
 > ⚠️ **Note:** The SIP agent uses `network_mode: host` for proper SIP/RTP handling.
 
----
-
 ## 📁 Directory Structure
 
 ```
@@ -266,11 +262,10 @@ sip-agent/
 └── 📄 requirements.txt
 ```
 
----
-
 ## 📞 PBX Configuration
 
-### FreePBX / Asterisk
+<Tabs>
+<Tab title="FreePBX / Asterisk">
 
 1. Navigate to **Applications → Extensions**
 2. Click **Add Extension → Add New SIP Extension**
@@ -280,9 +275,6 @@ sip-agent/
    - **Secret:** Your secure password
 4. Click **Submit** and **Apply Config**
 
-![FreePBX extension setup](screenshots/freepbx-extension.png)
-<!-- TODO: Screenshot of FreePBX extension configuration -->
-
 **Update your `.env`:**
 
 ```env
@@ -291,20 +283,22 @@ SIP_PASSWORD=your-extension-secret
 SIP_DOMAIN=192.168.1.100  # Your PBX IP
 ```
 
----
+</Tab>
 
-### 3CX
+<Tab title="3CX">
 
 1. Go to **Users → Add**
 2. Select **Extension Type:** SIP
 3. Configure authentication credentials
 4. Note the extension number and password
 
----
+</Tab>
+</Tabs>
 
 ## 🔍 Viewing Logs
 
-### Docker logs:
+<Tabs>
+<Tab title="Docker Logs">
 
 ```bash
 docker logs -f sip-agent
@@ -319,7 +313,9 @@ docker logs -f sip-agent
 {"ts": "2025-11-30 15:30:07", "level": "INFO", "event": "llm_response", "msg": "It's 3:30 PM..."}
 ```
 
-### Formatted log viewer:
+</Tab>
+
+<Tab title="Formatted Log Viewer">
 
 ```bash
 python tools/view-logs.py -f
@@ -340,14 +336,12 @@ python tools/view-logs.py -f
 15:30:15  📴 Call ended (duration: 0:10)
 ```
 
-![Log viewer](screenshots/log-viewer.png)
-<!-- TODO: Screenshot of view-logs.py output -->
-
----
+</Tab>
+</Tabs>
 
 ## 🔧 Troubleshooting
 
-### ❌ SIP Not Registering
+<Accordion title="SIP Not Registering" icon="exclamation-triangle">
 
 ```bash
 # Check SIP logs
@@ -359,9 +353,9 @@ docker logs sip-agent 2>&1 | grep -i "sip\|register"
 - 🔥 Firewall blocking UDP 5060
 - 🌐 Wrong `SIP_DOMAIN`
 
----
+</Accordion>
 
-### ❌ No Audio
+<Accordion title="No Audio" icon="volume-mute">
 
 ```bash
 # Test Speaches health
@@ -385,9 +379,9 @@ aplay test.wav  # Linux
 afplay test.wav # macOS
 ```
 
----
+</Accordion>
 
-### ❌ LLM Not Responding
+<Accordion title="LLM Not Responding" icon="robot">
 
 ```bash
 # Test LLM endpoint
@@ -403,14 +397,21 @@ curl http://your-llm-server:8000/v1/models | jq
 }
 ```
 
----
+</Accordion>
 
 ## ➡️ Next Steps
 
-| Guide | Description |
-|-------|-------------|
-| [⚙️ Configuration](configuration) | All environment variables |
-| [🌐 API Reference](api-reference) | REST API documentation |
-| [🔧 Built-in Tools](tools) | Available capabilities |
-| [🔌 Creating Plugins](plugins) | Add custom tools |
-| [📖 Examples](examples) | Integration patterns |
+<Cards columns="2">
+  <Card title="Configuration" href="configuration" icon="cog">
+    All environment variables and detailed configuration options
+  </Card>
+  <Card title="API Reference" href="api-reference" icon="code">
+    Complete REST API documentation and endpoints
+  </Card>
+  <Card title="Built-in Tools" href="tools" icon="tools">
+    Explore all available AI assistant capabilities
+  </Card>
+  <Card title="Creating Plugins" href="plugins" icon="plug">
+    Learn how to add custom tools and functionality
+  </Card>
+</Cards>
