@@ -1,5 +1,5 @@
 ---
-title: '📞⚡ General Disarray '
+title: '📞General Disarray '
 excerpt: '🤖 Voice-powered AI assistant for SIP phone systems by CHAOS.CORP '
 slug: overview
 ---
